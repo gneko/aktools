@@ -19,9 +19,9 @@ jobs:
         run: |
           npm i -s
           npm install -g @angular/cli
-      - name: Publish to Gitee
-        run: |
-          npm run-script build
+      - name: Build
+        run: npm run-script build
+      - name: Push to Gitee
           npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --email=graueneko@gmail.com --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
         env:
           TOKEN: ${{ secrets.GITEE_TOKEN }}
