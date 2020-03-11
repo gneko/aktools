@@ -35,13 +35,7 @@ jobs:
         run: git remote set-url origin https://x-access-token:$TOKEN@$REPO
         env:
           TOKEN: ${{ secrets.GH_TOKEN }}
-          REPO: github.com/graueneko/aktools.git
-      - name: Setup Coding
-        if: env.UPDATE==1
-        run: git remote set-url --add origin https://$TOKEN@$REPO
-        env:
-          TOKEN: ${{ secrets.CODING_TOKEN }}
-          REPO: e.coding.net/graueneko/aktools.git
+          REPO: github.com/graueneko/aktools-bigfun.git
       - name: Do push
         if: env.UPDATE==1
         run: git push
