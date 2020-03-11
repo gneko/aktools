@@ -22,7 +22,7 @@ jobs:
       - name: Publish to Gitee
         run: |
           npm run-script build
-          npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --email=hh88ua@foxmail.com --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
+          npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
         env:
           TOKEN: ${{ secrets.GITEE_TOKEN }}
           REPO: gitee.com/coder_1024/aktools.git
