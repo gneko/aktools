@@ -22,15 +22,15 @@ jobs:
       - name: Publish to Gitee
         run: |
           npm run-script build
-          npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
+          npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --email=graueneko@gmail.com --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
         env:
           TOKEN: ${{ secrets.GITEE_TOKEN }}
           REPO: gitee.com/coder_1024/aktools.git
       - name: Notify on failure
         if: failure()
-        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send?text=Fail-aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')
+        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send -X POST -d 'text=Fail:aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')'
       - name: Notify Sever.chan
-        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send?text=Succ-aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')
+        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send -X POST -d 'text=Succ:aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')'
     env:
       CI: true
       PROJECT: aktools
