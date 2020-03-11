@@ -26,12 +26,28 @@ jobs:
         env:
           TOKEN: ${{ secrets.GITEE_TOKEN }}
           REPO: gitee.com/coder_1024/aktools.git
-      - name: Notify on failure
+      - name: Send failure message
         if: failure()
-        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send -X POST -d 'text=Fail:aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')'
-      - name: Notify Sever.chan
-        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send -X POST -d 'text=Succ:aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          args: Fail on aktools-bigfun build & push
+      - name: Send success message
+        if: success()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          args: Succ on aktools-bigfun build & push
     env:
       CI: true
       PROJECT: aktools
       EMAIL: graueneko@gmail.com
+      Done! Congratulations on your new bot. You will find it at t.me/grauenekobot. You can now add a description, about section and profile picture for your bot, see /help for a list of commands. By the way, when you've finished creating your cool bot, ping our Bot Support if you want a better username for it. Just make sure the bot is fully operational before you do this.
+
+Use this token to access the HTTP API:
+1135328691:AAF0GktiyT_YL9fnxT8yUTBC0fAeHDbKnTc
+Keep your token secure and store it safely, it can be used by anyone to control your bot.
+
+For a description of the Bot API, see this page: https://core.telegram.org/bots/api
