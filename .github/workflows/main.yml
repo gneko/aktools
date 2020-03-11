@@ -26,20 +26,13 @@ jobs:
         env:
           TOKEN: ${{ secrets.GITEE_TOKEN }}
           REPO: gitee.com/coder_1024/aktools.git
-      - name: Send failure message
-        if: failure()
-        uses: appleboy/telegram-action@master
+      - name: Send status message
+        if: always()
+        uses: yanzay/notify-telegram@v0.1.0
         with:
-          to: ${{ secrets.TELEGRAM_TO }}
+          chat: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          args: Fail on aktools-bigfun build & push
-      - name: Send success message
-        if: success()
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          args: Succ on aktools-bigfun build & push
+          status: ${{ job.status }}
     env:
       CI: true
       PROJECT: aktools
