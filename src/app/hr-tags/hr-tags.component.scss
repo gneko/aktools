@@ -1,0 +1,55 @@
+@import "../styles/custom.scss";
+
+.mdc-button {
+  border-color: var(--hr-unselected-background);
+  background-color: var(--hr-unselected-background);
+  padding: 0em 0.5em;
+  min-width: 0px;
+  min-height: 0px;
+  height: 32px;
+  &:hover {
+    border-color: var(--mdc-theme-secondary);
+  }
+}
+
+.mdc-button--outlined:not(.mdc-button--raised){
+  color: var(--hr-unselected-text);
+  background-color: var(--hr-unselected-background);
+  border-color: var(--hr-tag-border);
+}
+.mdc-button--outlined.mdc-button--raised {
+  color: var(--hr-selected-text);
+  background-color: var(--hr-selected-background);
+  border-color: var(--hr-selected-background);
+}
+
+.mdc-button.btnTitle {
+  background-color: var(--hr-unselected-background);
+  color: var(--hr-unselected-text);
+}
+
+.no-padding {
+  padding: 0px, 0px, 0px, 0px;
+}
+
+.mdc-chip {
+  margin: 2px;
+}
+
+.btnStarGroup .mdc-button {
+  padding: 0 0.36em;
+  min-width: 0px;
+}
+
+.btnRowTitle {
+  color: var(--hr-unselected-text);
+  background-color: unset;
+  padding: 0 0.25em;
+  min-width: 40px;
+  margin: 0px;
+  pointer-events: none;
+}
+
+.even-row {
+  background-color: var(--hr-gap-background);
+}

@@ -1,0 +1,35 @@
+// https://colorhunt.co/palette/361
+$color-1: #d0694e;
+$color-2: #f6ce8c;
+$color-3: #c3e3e5;
+$color-4: #589bad;
+
+$color-muted: rgb(153, 153, 153);; // 方舟-文本灰
+$color-primary: rgb(34, 187, 255); // 方舟-蓝
+$color-success: rgb(127, 224, 149); // bootstrap4
+$color-info: rgb(137, 137, 137); // 方舟-灰
+$color-warning: #fe2; // 方舟-黄
+$color-danger: #ec2b00; // 洪炉示岁
+$color-secondary: rgb(137, 137, 137); // 方舟-灰
+$color-dark: #313131; // 方舟-按钮
+$color-black: #000; // 纯黑
+$color-light: rgb(250, 249, 248); //bootstrap4
+$color-white: #fff; // bootstrap4
+
+$mdc-typography-font-family: -apple-system, "Noto Sans", "Helvetica Neue", Helvetica, "Nimbus Sans L", Arial,
+  "Liberation Sans", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC", "Source Han Sans CN",
+  SimHei, "Microsoft YaHei", "Wenquanyi Micro Hei", "WenQuanYi Zen Hei", "ST Heiti", "WenQuanYi Zen Hei Sharp",
+  sans-serif;
+
+$highlight-background: #e8eaf7;
+button {
+  margin: 0.25em;
+  white-space: nowrap;
+}
+a {
+  text-decoration: none;
+}
+option {
+  color: var(--mdc-theme-text-primary-on-background);
+  background-color: var(--mdc-theme-background);
+}

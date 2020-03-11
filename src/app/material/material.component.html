@@ -1,0 +1,161 @@
+<aside #dialogPlan="mdcDialog" mdcDialog mdcFocusTrap>
+  <div mdcDialogSurface>
+    <header mdcDialogHeader>
+      <h3 mdcDialogHeaderTitle>材料路径规划（试行，仅供参考）</h3>
+    </header>
+    <section mdcDialogBody scrollable>
+      <div fxLayout="column">
+
+        <div fxLayout="row" fxFlex="100" fxLayoutGap="2%" fxLayoutAlign="start center">
+          <div mdcFormField>
+            <div mdcSwitch>
+              <input mdcSwitchInput type="checkbox" [(ngModel)]="request.extra_outc" />
+            </div>
+            <label mdcFormFieldLabel>计算合成副产物</label>
+          </div>
+          <div mdcFormField>
+            <div mdcSwitch>
+              <input mdcSwitchInput type="checkbox" [(ngModel)]="request.exp_demand" />
+            </div>
+            <label mdcFormFieldLabel>需求大量经验</label>
+          </div>
+          <div mdcFormField>
+            <div mdcSwitch>
+              <input mdcSwitchInput type="checkbox" [(ngModel)]="request.gold_demand" />
+            </div>
+            <label mdcFormFieldLabel>需求大量龙门币</label>
+          </div>
+          <div>
+            <button mdcButton raised dense (click)="plan()">开始规划</button>
+          </div>
+          <div>
+            <button mdcButton raised dense (click)="chooseStage=!chooseStage">{{chooseStage ? "关闭" : "显示"}}关卡选择</button>
+          </div>
+        </div>
+        <app-stage-chooser #chooser [style]="{display:chooseStage ? 'block' : 'none'}"></app-stage-chooser>
+        <li mdcListDivider></li>
+        <h4>by <a href="https://github.com/ycremar/ArkPlanner">@ycremar</a>(算法) & <a
+            href="https://github.com/invisiblearts/ArkPlanner">@invisiblearts</a>(数据)</h4>
+        <h4>体力预计消耗：<strong>{{cost}}</strong></h4>
+        <ng-container *ngIf="stagesText.length!==0">
+          <h4>刷本获取：</h4>
+          <ul mdcList>
+            <li mdcListItem *ngFor="let st of stagesText">{{st}}</li>
+          </ul>
+        </ng-container>
+        <ng-container *ngIf="synsText.length!==0">
+          <h4>合成获取：</h4>
+          <ul mdcList>
+            <li mdcListItem *ngFor="let sy of synsText">{{sy}}</li>
+          </ul>
+        </ng-container>
+
+      </div>
+    </section>
+    <footer mdcDialogFooter>
+      <button mdcButton mdcDialogCancel>关闭</button>
+      <button mdcButton mdcDialogAccept (click)="copyResult()">复制</button>
+    </footer>
+  </div>
+  <div mdcDialogBackdrop></div>
+</aside>
+<aside #dialogData="mdcDialog" mdcDialog>
+  <div mdcDialogSurface class="dialog-data">
+    <section mdcDialogBody>
+      <div fxLayout="column" fxLayoutAlign="start center">
+        <div fxLayout="row" fxLayoutAlign="center center">
+          <div>
+            <button mdcButton raised dense id="btnReset" (click)="reset(false)">重置</button>
+          </div>
+          <div>
+            <button mdcButton raised dense id="btnResetNeed" (click)="reset(true)">重置需求</button>
+          </div>
+          <div>
+            <button mdcButton mdcDialogCancel>关闭</button>
+          </div>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center center">
+          <div mdcTextField [dense]="true">
+            <textarea mdcTextFieldInput type="text" rows="5" cols="60" #input1="ngModel"
+              [(ngModel)]="exportedData"></textarea>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="center center">
+            <button mdcButton raised dense id="btnExport" (click)="copyExport()">复制</button>
+          </div>
+        </div>
+        <div fxLayout="row" class="hint" fxLayoutAlign="center center">
+          <p><small>若未弹出成功提示，或复制失败，请手动复制。</small></p>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="center center">
+          <div mdcTextField [dense]="true">
+            <textarea mdcTextFieldInput type="text" rows="5" cols="60" #input1="ngModel"
+              [(ngModel)]="importedData"></textarea>
+          </div>
+          <div fxLayout="row" fxLayoutAlign="center center">
+            <button mdcButton raised dense id="btnImport" (click)="getImportedData()">导入</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div mdcDialogBackdrop></div>
+</aside>
+<div fxLayout="row wrap" fxLayoutAlign="center center">
+  <div fxLayout="row wrap" fxFlex="100" fxFlex.gt-sm="50" fxLayoutAlign="end center" fxLayoutGap="1%"
+    class="options-box">
+    <div fxLayout="row wrap" fxFlex="100" fxFlex.gt-xs="30" fxLayoutAlign="start center">
+      <div mdcFormField fxFlex="100">
+        <!-- <button mdcButton raised dense id="btnReset" (click)="reset()">重置</button> -->
+        <button mdcButton raised dense id="btnData" (click)="dialogData.open()">重置/导入/导出</button>
+      </div>
+      <div fxFlex="100" fxShow="true" fxShow.gt-xs="false" class="sepatator">
+      </div>
+    </div>
+    <div fxLayout="row" fxFlex="100" fxFlex.gt-xs="65" fxLayoutAlign="end center">
+      <div mdcFormField>
+        <div mdcSwitch>
+          <input mdcSwitchInput type="checkbox" [(ngModel)]="options.showOnly3plus" (change)="onOptionChange()" />
+        </div>
+        <label mdcFormFieldLabel>3★及以上</label>
+      </div>
+      <div mdcFormField>
+        <div mdcSwitch>
+          <input mdcSwitchInput type="checkbox" [(ngModel)]="options.filtered" (change)="onOptionChange()" />
+        </div>
+        <label mdcFormFieldLabel>过滤</label>
+      </div>
+      <div mdcFormField>
+        <button mdcButton raised dense (click)="dialogPlan.open()">刷图规划</button>
+      </div>
+    </div>
+  </div>
+  <div fxLayout="row" fxFlex="100" fxFlex.gt-sm="50" fxLayoutAlign="start center" fxLayoutGap="1%" class="options-box">
+    <div mdcFormField>
+      <div mdcSwitch>
+        <input mdcSwitchInput type="checkbox" [(ngModel)]="options.showMat" (change)="onOptionChange()" />
+      </div>
+      <label mdcFormFieldLabel>精英材料</label>
+    </div>
+    <div mdcFormField>
+      <div mdcSwitch>
+        <input mdcSwitchInput type="checkbox" [(ngModel)]="options.showBook" (change)="onOptionChange()" />
+      </div>
+      <label mdcFormFieldLabel>技能书</label>
+    </div>
+    <div mdcFormField>
+      <div mdcSwitch>
+        <input mdcSwitchInput type="checkbox" [(ngModel)]="options.showChip" (change)="onOptionChange()" />
+      </div>
+      <label mdcFormFieldLabel>芯片</label>
+    </div>
+  </div>
+  <div fxLayout="row wrap" fxFlex="100" fxLayoutAlign="start start">
+    <ng-container *ngFor="let item of items; trackBy:trackItem">
+      <div fxFlex="50" fxFlex.gt-xs="33" fxFlex.gt-sm="25" fxFlex.gt-md="16" class="padding-025"
+        [hidden]="((options.filtered && !data[item.name].need && !data[item.name].lack)||(options.showOnly3plus && item.id.startsWith('30') && item.rarity<3)||(!options.showMat && (item.id.startsWith('30') || item.id.startsWith('31')))||(!options.showBook && item.id.startsWith('33'))||(!options.showChip && item.id.startsWith('32')))">
+        <app-material-card [item]="item" [itemdata]="data[item.name]" (dataChange)="onDataChange($event)"
+          (reportMerge)="onMatMerge($event)"></app-material-card>
+      </div>
+    </ng-container>
+  </div>
+</div>

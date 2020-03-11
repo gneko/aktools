@@ -1,0 +1,107 @@
+@import "./styles/custom.scss";
+@import "@material/theme/mixins";
+
+[mdcDrawerHeader],
+[mdcDrawerToolbarSpacer],
+[mdcToolbar] {
+  // color the header variants the same way as the toolbar:
+  @include mdc-theme-prop(background-color, primary);
+  @include mdc-theme-prop(color, on-primary);
+
+  /* Support for iOS 11.2+. */
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-left: env(safe-area-inset-left);
+}
+
+// .toolbar-titles {
+//   padding: 0.5em;
+// }
+
+section {
+  align-items: center;
+}
+
+[mdcDrawerHeader] {
+  height: 128px;
+}
+[mdcDrawerToolbarSpacer],
+[mdcToolbar] {
+  height: 64px;
+}
+[mdcToolbarRow] {
+  min-height: 100%;
+}
+
+.container {
+  //@include mdc-theme-prop(background-color, background);
+  //@include mdc-theme-prop(color, text-primary-on-background);
+
+  max-width: 1400px;
+  margin: auto;
+  padding-top: calc(0.5em + env(safe-area-inset-top));
+  padding-right: calc(0.5em + env(safe-area-inset-right));
+  padding-bottom: calc(0.5em + env(safe-area-inset-bottom));
+  padding-left: calc(0.5em + env(safe-area-inset-left));
+  width: 100%;
+  box-sizing: border-box;
+}
+.mdc-toolbar__title {
+  font-size: 1.125em;
+  color: var(--mdc-theme-on-primary);
+  padding: 0.25em;
+}
+.mdc-toolbar__title.router-active {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 1em 0.5em 1em 0.5em;
+  border-color: #ffffff;
+}
+
+[mdcDrawerHeaderContent] {
+  .mdc-toolbar__title.router-active {
+    border: none;
+  }
+  .drawer-header {
+    height: 100%;
+    widows: 100%;
+  }
+}
+
+[mdcDrawerContent] {
+  a {
+    color: var(--mdc-theme-secondary);
+    &:hover {
+      color: var(--mdc-theme-on-secondary);
+      background-color: var(--mdc-theme-secondary);
+      i {
+        font-size: 32px;
+        color: var(--mdc-theme-on-secondary);
+      }
+    }
+    i {
+      color: var(--mdc-theme-secondary);
+    }
+  }
+}
+
+.router-active.small {
+  font-size: 80%;
+}
+
+.toolbar-titles {
+  height: 100%;
+  align-items: center;
+  display: flex;
+}
+
+.img-header {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+}
+
+.img-title {
+  width: 48px;
+  height: 48px;
+}

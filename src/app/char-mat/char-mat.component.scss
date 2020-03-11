@@ -1,0 +1,25 @@
+.input-field {
+  width: 100%;
+  margin: 0.25em;
+}
+input,
+select {
+  text-align: center;
+  padding-inline-start: 0.5em;
+}
+.padding-x-1 {
+  padding: 0 1em;
+}
+div {
+  color: var(--mdc-theme-on-surface);
+}
+
+option,
+.tpob {
+  color: var(--mdc-theme-text-primary-on-background);
+  background-color: var(--mdc-theme-background);
+}
+
+.mdc-select__native-control:focus ~ .mdc-floating-label {
+  color: var(--mdc-theme-text-primary-on-background);
+}

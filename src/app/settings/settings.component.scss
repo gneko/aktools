@@ -1,0 +1,17 @@
+.settings-container {
+    max-width: 600px;
+    margin: auto;
+}
+.mdc-dialog__surface {
+    background-color: var(--mdc-theme-surface);
+}
+.mdc-dialog {
+    color: var(--mdc-theme-text-primary-on-background);
+}
+.mdc-dialog__body {
+    color: var(--mdc-theme-text-secondary-on-background);
+}
+
+[mdcButton] {
+    color: var(--mdc-theme-on-surface);
+}

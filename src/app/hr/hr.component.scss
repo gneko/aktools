@@ -1,0 +1,31 @@
+@import "../styles/custom.scss";
+
+.float-box {
+  position: fixed;
+}
+.tagrows-container {
+  max-width: 550px;
+}
+.mdc-button {
+  padding: 0em 0.75em;
+  min-width: 0px;
+  min-height: 0px;
+  height: 32px;
+}
+
+.option-0 {
+  color: #1a1d1e;
+  background-color: $color-2;
+}
+.option-1 {
+  color: #1a1d1e;
+  background-color: $color-3;
+}
+.option-2 {
+  color: white;
+  background-color: $color-4;
+}
+#btnClear {
+  color: #fff;
+  background-color: $color-1;
+}

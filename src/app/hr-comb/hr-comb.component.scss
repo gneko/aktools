@@ -1,0 +1,101 @@
+@import "../styles/custom.scss";
+
+.char-lvl-6 {
+  background-color: #d0694e;
+  color: white;
+}
+
+.char-lvl-5 {
+  background-color: #f9ce8c;
+  color: #1a1d1e;
+}
+
+.char-lvl-4 {
+  background-color: #589bad;
+  color: white;
+}
+
+.char-lvl-3 {
+  background-color: #7ebc59;
+  color: white;
+}
+
+.char-lvl-2 {
+  background-color: #c3e3e5;
+  color: #1a1d1e;
+}
+
+.char-lvl-1 {
+  background-color: #1a1d1e;
+  color: white;
+}
+
+.char-hl {
+  background-color: var(--mdc-theme-primary);
+  color: white;
+}
+
+table {
+  width: 100%;
+  td {
+    background: var(--hr-comb-background);
+    color: rgba(#fff, 0.3);
+    font-size: 1em;
+    padding: 0px;
+  }
+}
+
+[mdcCard] {
+  margin: 8px 4px;
+  background: var(--hr-comb-background);
+}
+
+
+// .btn-tag {
+//   background-color: $mdc-theme-secondary;
+//   color: #fff;
+// }
+
+.mdc-list-divider {
+  margin: 2px;
+}
+
+.mdc-chip {
+  margin: 8px;
+  background: transparent
+}
+
+.mdc-button {
+  padding: 0em 0.75em;
+  min-width: 0px;
+  min-height: 0px;
+  height: 32px;
+}
+
+.mdc-button.mdc-button--outlined {
+  padding: 0em 0.5em;
+  background-color: var(--mdc-theme-on-primary);
+}
+
+.gap-row {
+  background-color: var(--hr-gap-background);
+}
+
+[mdcListDivider] {
+  margin: 0px;
+}
+
+// td {
+//   min-width: 125px;
+// }
+.p-25{
+  padding: 0.25em;
+}
+.inline-block {
+  display: inline-block;
+}
+.hidden-gap-row {
+  height: 1px;
+  width: 100%;
+  min-width: 100%;
+}

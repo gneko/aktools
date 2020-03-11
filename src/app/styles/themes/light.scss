@@ -1,0 +1,35 @@
+$mdc-theme-primary   : #5c638b;
+$mdc-theme-on-primary: #fff;
+
+$mdc-theme-secondary   : #87a0c6;
+$mdc-theme-on-secondary: #000;
+$mdc-theme-background  : #fff;
+
+$mdc-theme-surface : #fff;
+$mdc-theme-on-surface: #5c638b;
+
+:root {
+    --hr-gap-background: #e8eaf7;
+    --hr-comb-background: #ffffff;
+    --hr-selected-background: #5c638b;
+    --hr-unselected-background: #fff;
+    --hr-selected-text: #fff;
+    --hr-unselected-text: #5c638b;
+    --hr-tag-border: #5c638b;
+}
+
+@import "material-components-web/material-components-web";
+
+#aside-logo,
+img[src$="github.png"] {
+    filter: invert(100%);
+}
+
+body {
+    background-attachment: fixed;
+    background-color: white;
+    // background-image: url(https://ak.hypergryph.com/assets/index/images/ak/pc/story/bk.jpg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
