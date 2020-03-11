@@ -28,9 +28,9 @@ jobs:
           REPO: gitee.com/coder_1024/aktools.git
       - name: Notify on failure
         if: failure()
-        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send?text=Fail:aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')
+        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send?text=Fail-aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')
       - name: Notify Sever.chan
-        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send?text=Succ:aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')
+        run: curl https://sc.ftqq.com/SCU88974T374e7b963106f48444129bb6ddd723ca5e68e351ccb9e.send?text=Succ-aktools-bigfun+$(date '+%Y-%m-%d %H:%M:%S')
     env:
       CI: true
       PROJECT: aktools
