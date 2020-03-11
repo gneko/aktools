@@ -260,13 +260,6 @@
   dependencies:
     tslib "^1.9.0"
 
-"@angular/service-worker@^8.0.3":
-  version "8.2.14"
-  resolved "https://registry.npm.taobao.org/@angular/service-worker/download/@angular/service-worker-8.2.14.tgz#fbea3899863cfa09196ce69fa470b163f25666ad"
-  integrity sha1-++o4mYY8+gkZbOafpHCxY/JWZq0=
-  dependencies:
-    tslib "^1.9.0"
-
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.5.5":
   version "7.5.5"
   resolved "https://registry.npm.taobao.org/@babel/code-frame/download/@babel/code-frame-7.5.5.tgz#bc0782f6d69f7b7d49531219699b988f669a8f9d"

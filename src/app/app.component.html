@@ -75,8 +75,6 @@
         (click)="doShare()">share</a>
       <a mdcToolbarIcon class="material-icons" *ngIf="!nav.share" aria-label="Copy" alt="Copy" title="分享" ngxClipboard
         [cbContent]="'明日方舟工具箱 - '+baseUrl" (cbOnSuccess)="showSnackBar('链接已复制~','好的')">content_copy</a>
-      <a mdcToolbarIcon class="material-icons" aria-label="Update" alt="Update" title="更新"
-        (click)="doUpdate()">update</a>
       <a mdcToolbarIcon class="material-icons" routerLink="/help" aria-label="Help" alt="Help" title="帮助">help</a>
       <a mdcToolbarIcon class="material-icons" routerLink="/settings" aria-label="Settings" alt="Settings"
         title="设置">settings</a>

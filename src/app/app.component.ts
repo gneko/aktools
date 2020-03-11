@@ -1,6 +1,5 @@
 import { Component, HostListener } from '@angular/core';
 import { MdcSnackbarService } from '@blox/material';
-import { SwUpdate } from '@angular/service-worker';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import {SwitchThemeService} from './switch-theme.service';
 import { Observable } from 'rxjs';
@@ -37,28 +36,12 @@ export class AppComponent {
   }
 
   constructor(private snackBar: MdcSnackbarService,
-              private swUpdate: SwUpdate,
               private router: Router,
               private activatedRoute: ActivatedRoute,
               private switchTheme: SwitchThemeService,
               private fetchService: FetchService) {
     this.baseUrl = window.location.origin;
     this.nav = window.navigator;
-    if (this.swUpdate.isEnabled) {
-      this.swUpdate.checkForUpdate();
-      this.swUpdate.available.subscribe(() => {
-        const snackbarRef = this.snackBar.show({
-          message: '有新版本可用，是否更新？(同样可以点击右上角手动更新）',
-          actionText: '更新',
-          multiline: true,
-          actionOnBottom: true,
-          timeout: 5000
-        });
-        snackbarRef.action().subscribe(() => {
-          this.doUpdate();
-        });
-      });
-    }
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         ga('set', 'page', event.urlAfterRedirects);
@@ -82,9 +65,6 @@ export class AppComponent {
       this.switchTheme.setTheme(this.theme);
       this.fetchService.setLocalStorage("theme", this.theme);
     }
-  }
-  doUpdate() {
-    this.swUpdate.activateUpdate().then(() => window.location.reload());
   }
   doShare() {
     if (this.nav && this.nav.share) {

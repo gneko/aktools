@@ -22,7 +22,6 @@
     "@angular/platform-browser": "^9.1.0-next.1",
     "@angular/platform-browser-dynamic": "^9.1.0-next.1",
     "@angular/router": "^9.1.0-next.1",
-    "@angular/service-worker": "^9.1.0-next.1",
     "@blox/material": "^0.17.0",
     "fonts.css": "^2.0.0",
     "msgpack-lite": "^0.1.26",

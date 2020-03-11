@@ -1,7 +1,7 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/dist/aktools
+/dist
 
 /tmp
 /out-tsc
@@ -49,7 +49,3 @@ Thumbs.db
 
 build_pub.sh
 publish.sh
-
-# version data
-/dist/aktools-old/version.json
-/dist/aktools/version.json

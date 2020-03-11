@@ -13,8 +13,6 @@ import { HrCombComponent } from './hr-comb/hr-comb.component';
 import { LvlupComponent } from './lvlup/lvlup.component';
 import { MaterialComponent } from './material/material.component';
 import { MaterialCardComponent } from './material-card/material-card.component';
-import { ServiceWorkerModule } from '@angular/service-worker';
-import { environment } from '../environments/environment';
 import { MainComponent } from './main/main.component';
 import { HelpComponent } from './help/help.component';
 import { ClipboardModule } from 'ngx-clipboard';
