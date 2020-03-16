@@ -38,7 +38,7 @@ export class FetchService {
   }
 
   public getVersionData(name: string): Observable<any> {
-    let url = this.getStaticPath + name;
+    let url = this.getStaticPath() + 'data/' + name;
     if (url in this.cache) {
       return this.cache[url];
     }
