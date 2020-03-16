@@ -1,10 +1,10 @@
 # 明日方舟工具箱
 
-### 作者: [一只灰猫](https://github.com/graueneko)
+### 作者: [灰格猫](https://github.com/graueneko)
 
 ## 开始使用
 
-目前已部署在 Github Pages: [明日方舟工具箱 by 一只灰猫](https://aktools.graueneko.xyz/)
+目前已部署在 Github Pages: [明日方舟工具箱 by 灰格猫](https://aktools.graueneko.xyz/)
 
 ## 二次开发
 

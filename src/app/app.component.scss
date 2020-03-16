@@ -52,9 +52,9 @@ section {
   padding: 0.25em;
 }
 .mdc-toolbar__title.router-active {
-  border: 1px solid rgba(0, 0, 0, 0.125);
-  border-radius: 1em 0.5em 1em 0.5em;
-  border-color: #ffffff;
+  border: 1px solid;
+  border-radius: 0.75em;
+  border-color: #ffffff66;
 }
 
 [mdcDrawerHeaderContent] {
