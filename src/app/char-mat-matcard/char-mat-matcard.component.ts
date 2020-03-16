@@ -12,6 +12,8 @@ import { MdcSnackbarService } from '@blox/material';
 export class CharMatMatcardComponent implements OnInit {
   @Input() allmats: { [key: string]: MaterialItem };
   private innerSMats = [];
+  staticPath: string;
+
   @Input()
   set smats(sm: Array<any>) {
     this.innerSMats = sm;
@@ -46,7 +48,7 @@ export class CharMatMatcardComponent implements OnInit {
       }
     }
     for (const m of this.innerSMats) {
-      if(data[this.allmats[m.id].name]){
+      if (data[this.allmats[m.id].name]) {
         data[this.allmats[m.id].name].need = m.count;
       } else {
         this.snackbar.show({
@@ -71,6 +73,7 @@ export class CharMatMatcardComponent implements OnInit {
   constructor(private fetch: FetchService, private router: Router, private snackbar: MdcSnackbarService) { }
 
   ngOnInit() {
+    this.staticPath = this.fetch.getStaticPath();
   }
 
 }

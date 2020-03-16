@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { NONE_TYPE } from '@angular/compiler';
 
 @Injectable({
   providedIn: 'root'
@@ -37,17 +38,20 @@ export class FetchService {
   }
 
   public getVersionData(name: string): Observable<any> {
-    let url = '';
-    if ('data_version' in window) {
-      url = '/static/aktools/' + window['data_version'] + '/data/' + name;
-    } else {
-      url = '/static/data/' + name;
-    }
+    let url = this.getStaticPath + name;
     if (url in this.cache) {
       return this.cache[url];
     }
     const resp = this.http.get<any>(url);
     this.cache[url] = resp;
     return resp;
+  }
+
+  public getStaticPath() {
+    if ('data_version' in window) {
+      return '/static/aktools/' + window['data_version'] + '/';
+    } else {
+      return '/static/';
+    }
   }
 }

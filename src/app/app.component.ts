@@ -1,11 +1,9 @@
 import { Component, HostListener } from '@angular/core';
 import { MdcSnackbarService } from '@blox/material';
-import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import {SwitchThemeService} from './switch-theme.service';
-import { Observable } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { SwitchThemeService } from './switch-theme.service';
 import { FetchService } from './fetch.service';
 
-declare var ga: Function;
 
 @Component({
   selector: 'app-root',
@@ -21,6 +19,7 @@ export class AppComponent {
   temporary = 'temporary';
   showNavbar = true;
   theme: string;
+  staticPath: string;
 
   toggleDrawer(): void {
     this.drawerOpen = !this.drawerOpen;
@@ -36,32 +35,26 @@ export class AppComponent {
   }
 
   constructor(private snackBar: MdcSnackbarService,
-              private router: Router,
-              private activatedRoute: ActivatedRoute,
-              private switchTheme: SwitchThemeService,
-              private fetchService: FetchService) {
+    private activatedRoute: ActivatedRoute,
+    private switchTheme: SwitchThemeService,
+    private fetchService: FetchService) {
     this.baseUrl = window.location.origin;
     this.nav = window.navigator;
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        ga('set', 'page', event.urlAfterRedirects);
-        ga('send', 'pageview');
-      }
-    });
     this.activatedRoute.queryParams.subscribe(params => {
       this.showNavbar = !('hidenav' in params);
     });
 
     this.theme = this.fetchService.getLocalStorage("theme", "dark");
     this.switchTheme.setTheme(this.theme);
+    this.staticPath = this.fetchService.getStaticPath();
   }
   toggleTheme() {
-    if(this.theme==="light"){
-      this.theme="dark";
+    if (this.theme === "light") {
+      this.theme = "dark";
       this.switchTheme.setTheme(this.theme);
       this.fetchService.setLocalStorage("theme", this.theme);
-    }else {
-      this.theme="light";
+    } else {
+      this.theme = "light";
       this.switchTheme.setTheme(this.theme);
       this.fetchService.setLocalStorage("theme", this.theme);
     }

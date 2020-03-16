@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FetchService } from '../fetch.service';
 
 @Component({
   selector: 'app-help',
@@ -6,10 +7,12 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./help.component.scss']
 })
 export class HelpComponent implements OnInit {
+  staticPath: string;
 
-  constructor() { }
+  constructor(private fetchService: FetchService) { }
 
   ngOnInit() {
+    this.staticPath = this.fetchService.getStaticPath();
   }
 
   scrollToAnchor($element: any) {

@@ -17,10 +17,10 @@ sed -i -e 's#</noscript>#</noscript><script>window.data_version='$ts';</script>#
 
 cp -R ./aktools-old ./dist/
 
-sed -i -e 's#"static/#static/aktools-old/'$ts'/#g' ./dist/aktools-old/akevolve.html
-sed -i -e 's#"static/#static/aktools-old/'$ts'/#g' ./dist/aktools-old/akhr.html
-sed -i -e 's#"static/#static/aktools-old/'$ts'/#g' ./dist/aktools-old/akhrchars.html
-sed -i -e 's#"static/#static/aktools-old/'$ts'/#g' ./dist/aktools-old/aklevel.html
+sed -i -e 's#"static/#"static/aktools-old/'$ts'/#g' ./dist/aktools-old/akevolve.html
+sed -i -e 's#"static/#"static/aktools-old/'$ts'/#g' ./dist/aktools-old/akhr.html
+sed -i -e 's#"static/#"static/aktools-old/'$ts'/#g' ./dist/aktools-old/akhrchars.html
+sed -i -e 's#"static/#"static/aktools-old/'$ts'/#g' ./dist/aktools-old/aklevel.html
 
 if ls ./dist/aktools-old/*-e 1> /dev/null 2>&1; then
   rm ./dist/aktools-old/*-e
