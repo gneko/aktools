@@ -20,9 +20,18 @@ jobs:
           npm i -s
           npm install -g @angular/cli
       - name: Build
-        run: npm run-script build
+        run: ng build --prod
+      - name: Push to ghpages as test
+        run: npx angular-cli-ghpages --dir=dist/aktools --repo=https://$TOKEN@$REPO --no-silent --branch=ghpages --email=$EMAIL --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
+        env:
+          TOKEN: ${{ secrets.GH_TOKEN }}
+          REPO: github.com/graueneko/aktools-bigfun.git
+          PROJECT: aktools
       - name: Push to Gitee
-        run: npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --email=graueneko@gmail.com --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
+        run: |
+          # npm run-script build
+          bash ./postbuild.sh
+          npx angular-cli-ghpages --dir=dist/ --repo=https://$TOKEN@$REPO --no-silent --branch=master --email=$EMAIL --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
         env:
           TOKEN: ${{ secrets.GITEE_TOKEN }}
           REPO: gitee.com/coder_1024/aktools.git
@@ -35,5 +44,4 @@ jobs:
           status: ${{ job.status }}
     env:
       CI: true
-      PROJECT: aktools
       EMAIL: graueneko@gmail.com
