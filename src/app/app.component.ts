@@ -48,10 +48,10 @@ export class AppComponent {
     this.theme = this.fetchService.getLocalStorage("theme", "dark");
     this.switchTheme.setTheme(this.theme);
     this.staticPath = this.fetchService.getStaticPath();
-    if(this.checkOS()=='I'){
-      this.appLink='https://at.umtrack.com/GHvWji';
-    }else {
-      this.appLink='https://at.umtrack.com/STTjqe';
+    if (this.checkOS() === 'I') {
+      this.appLink = 'https://at.umtrack.com/GHvWji';
+    } else {
+      this.appLink = 'https://at.umtrack.com/STTjqe';
     }
   }
   toggleTheme() {
