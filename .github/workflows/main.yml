@@ -22,11 +22,12 @@ jobs:
       - name: Build
         run: ng build --prod
       - name: Push to ghpages as test
-        run: npx angular-cli-ghpages --dir=dist/aktools --repo=https://$TOKEN@$REPO --no-silent --branch=ghpages --email=$EMAIL --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
+        run: npx angular-cli-ghpages --dir=dist/aktools --repo=https://$TOKEN@$REPO --no-silent --branch=gh-pages --email=$EMAIL --cname=$CNAME --name=graueneko --message "$(date '+%Y-%m-%d %H:%M:%S')"
         env:
           TOKEN: ${{ secrets.GH_TOKEN }}
           REPO: github.com/graueneko/aktools-bigfun.git
           PROJECT: aktools
+          CNAME: aktoolsbf.test.graueneko.com
       - name: Push to Gitee
         run: |
           # npm run-script build
