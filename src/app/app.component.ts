@@ -11,7 +11,7 @@ import { FetchService } from './fetch.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = '明日方舟工具箱 by 一只灰猫';
+  title = '明日方舟工具箱';
   drawerOpen = false;
   deferredPrompt: any;
   baseUrl: string;
@@ -20,6 +20,7 @@ export class AppComponent {
   showNavbar = true;
   theme: string;
   staticPath: string;
+  appLink: string;
 
   toggleDrawer(): void {
     this.drawerOpen = !this.drawerOpen;
@@ -47,6 +48,11 @@ export class AppComponent {
     this.theme = this.fetchService.getLocalStorage("theme", "dark");
     this.switchTheme.setTheme(this.theme);
     this.staticPath = this.fetchService.getStaticPath();
+    if(this.checkOS()=='I'){
+      this.appLink='https://at.umtrack.com/GHvWji';
+    }else {
+      this.appLink='https://at.umtrack.com/STTjqe';
+    }
   }
   toggleTheme() {
     if (this.theme === "light") {
@@ -67,6 +73,15 @@ export class AppComponent {
         url: window.location.origin
       });
     }
+  }
+
+  checkOS() {
+    // See: https://stackoverflow.com/questions/21741841/detecting-ios-android-operating-system
+    const userAgent = navigator.userAgent || navigator.vendor || window['opera'];
+    if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+      return 'I';
+    }
+    return 'A';
   }
 
 
