@@ -1,6 +1,7 @@
 import { Injectable, RendererFactory2, Renderer2, Inject } from '@angular/core';
 import { Observable, BehaviorSubject, combineLatest } from 'rxjs';
 import { DOCUMENT } from '@angular/common';
+import { resolve } from 'dns';
 
 @Injectable({
   providedIn: 'root'

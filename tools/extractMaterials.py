@@ -13,17 +13,19 @@ base = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_
 # 某次更新后上面所用的数据出现了乱码问题，可以clone到本地后手动修复，此时需要用以下路径
 # base = r"C:\Users\user\ArknightsGameData\zh_CN\gamedata"
 
+
 def readJson(path):
     if base.startswith("http"):
         r = requests.get(base + path
-        # 如果需要可以取消注释以使用代理，请注意socks5代理需要 pip3 install -U requests[socks]
-        # , proxies = { 'http': 'socks5://127.0.0.1:1086', 'https': 'socks5://127.0.0.1:1086'}
-        )
+                         # 如果需要可以取消注释以使用代理，请注意socks5代理需要 pip3 install -U requests[socks]
+                         # , proxies = { 'http': 'socks5://127.0.0.1:1086', 'https': 'socks5://127.0.0.1:1086'}
+                         )
         r.encoding = "utf-8"
         return r.json()
     else:
         with open(base + path, encoding='utf-8') as f:
             return json.load(f, encoding='utf-8')
+
 
 skillTbl = readJson("/excel/skill_table.json")
 skidToName = {}
@@ -45,7 +47,7 @@ profMap = {
 
 with open("./src/assets/data/charMaterials.json", "r", encoding="utf-8") as f:
     oldData = json.load(f)
-    print("Before update: {0} char-mats".format(len(oldData)))
+    # print("Before update: {0} char-mats".format(len(oldData)))
 
 newChars = []
 for chid in charTbl:
@@ -70,6 +72,6 @@ for chid in charTbl:
 
 with open("./src/assets/data/charMaterials.json", "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False)
-    print("After update: {0} char-mats".format(len(result)))
+    # print("After update: {0} char-mats".format(len(result)))
     if len(newChars) > 0:
-        print("New chars: {0}".format(", ".join(newChars)))
+        print("新干员：{0}".format("，".join(newChars)), end="")
