@@ -13,6 +13,7 @@ base = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_
 # 某次更新后上面所用的数据出现了乱码问题，可以clone到本地后手动修复，此时需要用以下路径
 # base = r"C:\Users\user\ArknightsGameData\zh_CN\gamedata"
 
+datafile = "./src/static/data/charMaterials.json"
 
 def readJson(path):
     if base.startswith("http"):
@@ -45,7 +46,7 @@ profMap = {
     'SPECIAL': '特种'
 }
 
-with open("./src/assets/data/charMaterials.json", "r", encoding="utf-8") as f:
+with open(datafile, "r", encoding="utf-8") as f:
     oldData = json.load(f)
     # print("Before update: {0} char-mats".format(len(oldData)))
 
@@ -70,7 +71,7 @@ for chid in charTbl:
         newChars.append(char['name'])
 
 
-with open("./src/assets/data/charMaterials.json", "w", encoding="utf-8") as f:
+with open(datafile, "w", encoding="utf-8") as f:
     json.dump(result, f, ensure_ascii=False)
     # print("After update: {0} char-mats".format(len(result)))
     if len(newChars) > 0:

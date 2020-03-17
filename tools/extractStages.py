@@ -16,6 +16,7 @@ base = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/%s/
 servers = ["en_US", "ja_JP", "ko_KR", "zh_CN"]
 newData = {"allStage": [], "preset": {}}
 
+datafile = "./src/static/data/StageList.json"
 
 def readJson(path, server="zh_CN"):
     if base.startswith("http"):
@@ -69,7 +70,7 @@ def ordered(obj):
         return obj
 
 
-with open("./src/assets/data/StageList.json", "r", encoding="utf-8") as f:
+with open(datafile, "r", encoding="utf-8") as f:
     oldData = json.load(f)
 
 
@@ -85,6 +86,6 @@ for server in servers:
         map(lambda a: a["code"], filter(checkActivityOpen, StageRawData["stages"])))
 
 if ordered(oldData) != ordered(newData):
-    with open("./src/assets/data/StageList.json", "w", encoding="utf-8") as f:
+    with open(datafile, "w", encoding="utf-8") as f:
         json.dump(newData, f, ensure_ascii=False)
     print("关卡数据", end="")
