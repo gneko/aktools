@@ -14,7 +14,6 @@ import { LvlupComponent } from './lvlup/lvlup.component';
 import { MaterialComponent } from './material/material.component';
 import { MaterialCardComponent } from './material-card/material-card.component';
 import { MainComponent } from './main/main.component';
-import { HelpComponent } from './help/help.component';
 import { ClipboardModule } from 'ngx-clipboard';
 import { CharMatComponent } from './char-mat/char-mat.component';
 import { CharMatCharcardComponent } from './char-mat-charcard/char-mat-charcard.component';
@@ -34,7 +33,6 @@ import { StageChooserComponent } from './stage-chooser/stage-chooser.component';
     MaterialComponent,
     MaterialCardComponent,
     MainComponent,
-    HelpComponent,
     CharMatComponent,
     CharMatCharcardComponent,
     CharMatMatcardComponent,
