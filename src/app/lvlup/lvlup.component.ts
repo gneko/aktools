@@ -57,9 +57,9 @@ export class LvlupComponent implements OnInit {
 
   toMaxLvl(isCurrent: boolean) {
     if (isCurrent) {
-      this.currentLvl = this.lvlJson.maxLevel[+this.star - 1][this.currentEvolve];
+      this.currentLvl = this.lvlJson.maxLevel[this.star - 1][this.currentEvolve];
     } else {
-      this.targetLvl = this.lvlJson.maxLevel[+this.star - 1][this.targetEvolve];
+      this.targetLvl = this.lvlJson.maxLevel[this.star - 1][this.targetEvolve];
     }
   }
   onStarChange() {
@@ -86,6 +86,7 @@ export class LvlupComponent implements OnInit {
         this.targetEvolve += this.targetEvolve < this.lvlJson.maxLevel[star - 1].length - 1 ? 1 : 0;
       } else {
         this.targetEvolve -= this.targetEvolve > 0 ? 1 : 0;
+        if(this.targetLvl > this.lvlJson.maxLevel[star - 1][this.targetEvolve]) this.toMaxLvl(false);
       }
     } else {
       if (isAdd) {
@@ -95,6 +96,7 @@ export class LvlupComponent implements OnInit {
         }
       } else {
         this.currentEvolve -= this.currentEvolve > 0 ? 1 : 0;
+        if(this.currentLvl > this.lvlJson.maxLevel[star - 1][this.currentEvolve]) this.toMaxLvl(true);
       }
     }
   }
@@ -102,7 +104,7 @@ export class LvlupComponent implements OnInit {
     // console.log(this);
     let cl = this.currentLvl;
     const ce = this.currentEvolve;
-    const star = +this.star;
+    const star = Number(this.star);
     const cex = this.currentExp;
     const tl = this.targetLvl;
     const te = this.targetEvolve;

@@ -14,7 +14,7 @@ base = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/%s/
 # base = r"C:\Users\user\ArknightsGameData\zh_CN\gamedata"
 
 servers = ["en_US", "ja_JP", "ko_KR", "zh_CN"]
-newData = {"allStage": [], "preset": {}}
+newData = {"allStage": [], "preset": {},"ActivityName":{}}
 
 datafile = "./src/static/data/StageList.json"
 
@@ -22,7 +22,7 @@ def readJson(path, server="zh_CN"):
     if base.startswith("http"):
         r = requests.get(base % server + path
                          # 如果需要可以取消注释以使用代理，请注意socks5代理需要 pip3 install -U requests[socks]
-                         # , proxies = { 'http': 'socks5://127.0.0.1:1080', 'https': 'socks5://127.0.0.1:1080'}
+                          , proxies = { 'http': 'socks5://127.0.0.1:1080', 'https': 'socks5://127.0.0.1:1080'}
                          )
         r.encoding = "utf-8"
         return r.json()
@@ -39,9 +39,7 @@ def addId(stage):
 
 def removeTR(stage):
     # 去除剿灭作战和教程关/突袭模式/超难关/龙门币支线关/物资筹备
-    if stage["drop"] == "4001":
-        return False
-    if re.search(r"(TR-\d+|H\d+-\d+|PR-[A-Z]-\d+|LS-\d+|SK-\d+|CA-\d+|AP-\d+)", stage["code"]):
+    if re.search(r"(TR-\d+|H\d+-\d+|PR-[A-Z]-\d+|LS-\d+|SK-\d+|CA-\d+|AP-\d+|CE-\d+)", stage["code"]):
         return False
     if not re.search("-", stage["code"]):
         return False
@@ -51,6 +49,7 @@ def removeTR(stage):
 
 
 def checkActivityOpen(stage):
+    stage["stageId"].split("-")[0]
     if StageRawData["stageValidInfo"].__contains__(stage["stageId"]):
         StageTime = StageRawData["stageValidInfo"][stage["stageId"]]
         if(time.time() > StageTime["startTs"] and (StageTime["endTs"] == -1 or time.time() < StageTime["endTs"])):
@@ -79,7 +78,11 @@ for server in servers:
     StageRawData["stages"] = list(
         filter(removeTR, map(addId, StageRawData["stages"].items())))
     if(server == "zh_CN"):
-        # 外服测试服
+        ActivityRawData = readJson("/excel/activity_table.json", server)
+        for Stage in StageRawData["stages"]:
+            if(ActivityRawData["basicInfo"].__contains__(Stage["stageId"].split("_")[0])):
+                StageCode=Stage["code"].split("-")[0]
+                newData["ActivityName"][StageCode]=ActivityRawData["basicInfo"][Stage["stageId"].split("_")[0]]["name"]
         newData["allStage"] = list(
             map(lambda a: a["code"], StageRawData["stages"]))
     newData["preset"][server] = list(
