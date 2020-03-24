@@ -22,7 +22,7 @@ def readJson(path, server="zh_CN"):
     if base.startswith("http"):
         r = requests.get(base % server + path
                          # 如果需要可以取消注释以使用代理，请注意socks5代理需要 pip3 install -U requests[socks]
-                          , proxies = { 'http': 'socks5://127.0.0.1:1080', 'https': 'socks5://127.0.0.1:1080'}
+                         # , proxies = { 'http': 'socks5://127.0.0.1:1080', 'https': 'socks5://127.0.0.1:1080'}
                          )
         r.encoding = "utf-8"
         return r.json()
