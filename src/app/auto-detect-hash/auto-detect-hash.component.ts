@@ -181,6 +181,7 @@ export class AutoDetectHashComponent implements OnInit {
       multiline: false,
       actionOnBottom: false
     });
+    this.router.navigateByUrl('/material');
   }
   LoadImage(src: string) {
     this.reset();

@@ -31,6 +31,7 @@ export class MaterialComponent implements OnInit {
   synsText = [];
   exportedData = '';
   importedData = '';
+  plannerData = '';
 
   request: any = {
     owned: null,
@@ -151,6 +152,7 @@ export class MaterialComponent implements OnInit {
     };
     this.calc();
     this.exportedData = '';
+    this.plannerData = '';
   }
 
   ngOnInit() {
@@ -268,12 +270,42 @@ export class MaterialComponent implements OnInit {
         ];
       }
     }
+    let pdata = [];
+    for (const name in this.data) {
+      let data = {
+        'name': name,
+        'have': this.data[name].have,
+        'need': this.data[name].need
+      }
+      pdata.push(data)
+    }
     this.exportedData = JSON.stringify(storage);
+    this.plannerData = JSON.stringify(pdata);
   }
   async copyExport() {
     if (navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(this.exportedData);
+        this.snackbar.show({
+          message: '已复制到剪切板。',
+          actionText: '好的',
+          multiline: false,
+          actionOnBottom: false
+        });
+      } catch (err) {
+        this.snackbar.show({
+          message: '复制失败。',
+          actionText: '好吧',
+          multiline: false,
+          actionOnBottom: false
+        });
+      }
+    }
+  }
+  async copyPlanner() {
+    if (navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(this.plannerData);
         this.snackbar.show({
           message: '已复制到剪切板。',
           actionText: '好的',
