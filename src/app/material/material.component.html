@@ -1,26 +1,43 @@
 <aside #dialogPlan="mdcDialog" mdcDialog mdcFocusTrap>
-  <div mdcDialogSurface class="dialog-plan">
+  <div mdcDialogSurface>
     <header mdcDialogHeader>
-      <h3 mdcDialogHeaderTitle>材料路径规划（仅供参考）</h3>
+      <h3 mdcDialogHeaderTitle>材料路径规划（试行，仅供参考）</h3>
     </header>
-    <section mdcDialogBody>
-      <div fxLayout="column" fxLayoutAlign="start center">
-        <div fxLayout="row" fxFlex="100" fxLayoutGap="2%" fxLayoutAlign="center center">
-          <div mdcTextField [dense]="true">
-            <textarea mdcTextFieldInput type="text" rows="5" cols="60" #input1="ngModel"
-              [(ngModel)]="plannerData"></textarea>
-          </div>
-          <div fxLayout="row" fxLayoutAlign="center center">
-            <button mdcButton raised dense id="btnExport" (click)="copyPlanner()">复制</button>
-          </div>
-        </div>
+    <section mdcDialogBody scrollable>
+      <div fxLayout="column">
+
         <div fxLayout="row" fxFlex="100" fxLayoutGap="2%" fxLayoutAlign="start center">
-          <p><a href="https://planner.penguin-stats.io/" target='_blank'>复制后，点此前往企鹅数据导入数据计算。</a></p>
+          <div mdcFormField>
+            <div mdcSwitch>
+              <input mdcSwitchInput type="checkbox" [(ngModel)]="request.extra_outc" />
+            </div>
+            <label mdcFormFieldLabel>计算合成副产物</label>
+          </div>
+          <div mdcFormField>
+            <div mdcSwitch>
+              <input mdcSwitchInput type="checkbox" [(ngModel)]="request.exp_demand" />
+            </div>
+            <label mdcFormFieldLabel>需求大量经验</label>
+          </div>
+          <div mdcFormField>
+            <div mdcSwitch>
+              <input mdcSwitchInput type="checkbox" [(ngModel)]="request.gold_demand" />
+            </div>
+            <label mdcFormFieldLabel>需求大量龙门币</label>
+          </div>
+          <div>
+            <button mdcButton raised dense (click)="plan()">开始规划</button>
+          </div>
+          <div>
+            <button mdcButton raised dense (click)="chooseStage=!chooseStage">{{chooseStage ? "关闭" : "显示"}}关卡选择</button>
+          </div>
         </div>
+        <app-stage-chooser #chooser [style]="{display:chooseStage ? 'block' : 'none'}"></app-stage-chooser>
       </div>
     </section>
     <footer mdcDialogFooter>
       <button mdcButton mdcDialogCancel>关闭</button>
+      <button mdcButton mdcDialogAccept (click)="copyResult()">复制</button>
     </footer>
   </div>
   <div mdcDialogBackdrop></div>
