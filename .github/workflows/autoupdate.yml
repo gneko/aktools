@@ -31,11 +31,11 @@ jobs:
           echo "::set-env name=UPDATE::0"
           if [[ $COMB ]]; then
             echo "::set-env name=UPDATE::1"
-            sed -i -e '/id="updates".*/a \ \ \ \ \ \ \ \ <p>'$(date +"%Y.%m.%d")' '$COMB'</p>' src/app/main/main.component.html
+            [[ $NEWCH ]] && sed -i -e '/id="updates".*/a \ \ \ \ \ \ \ \ <p>'$(date +"%Y.%m.%d")' '$NEWCH'</p>' src/app/main/main.component.html
             git config --global user.name "Neko Bot"
             git config --global user.email "graueneko@gmail.com"
             git checkout "${GITHUB_REF:11}"
-            git commit -am "数据更新"
+            git commit -am "数据更新: $COMB"
           fi
       - name: Setup Github
         if: env.UPDATE==1
