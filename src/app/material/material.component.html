@@ -4,27 +4,28 @@
       <h3 mdcDialogHeaderTitle>材料路径规划（试行，仅供参考）</h3>
     </header>
     <section mdcDialogBody scrollable>
-      <div fxLayout="column">
-
-        <div fxLayout="row" fxFlex="100" fxLayoutGap="2%" fxLayoutAlign="start center">
+      <div fxLayout="column" fxLayoutGap="0.25em">
+        <div fxLayout="row" fxFlex="100" fxLayoutGap="2%" fxLayoutAlign="center center">
           <div mdcFormField>
             <div mdcSwitch>
               <input mdcSwitchInput type="checkbox" [(ngModel)]="request.extra_outc" />
             </div>
-            <label mdcFormFieldLabel>计算合成副产物</label>
+            <label mdcFormFieldLabel>考虑合成副产物</label>
           </div>
           <div mdcFormField>
             <div mdcSwitch>
               <input mdcSwitchInput type="checkbox" [(ngModel)]="request.exp_demand" />
             </div>
-            <label mdcFormFieldLabel>需求大量经验</label>
+            <label mdcFormFieldLabel>需求经验</label>
           </div>
           <div mdcFormField>
             <div mdcSwitch>
               <input mdcSwitchInput type="checkbox" [(ngModel)]="request.gold_demand" />
             </div>
-            <label mdcFormFieldLabel>需求大量龙门币</label>
+            <label mdcFormFieldLabel>需求龙门币</label>
           </div>
+        </div>
+        <div fxLayout="row" fxFlex="100" fxLayoutGap="2%" fxLayoutAlign="center center">
           <div>
             <button mdcButton raised dense (click)="plan()">开始规划</button>
           </div>
@@ -37,7 +38,6 @@
     </section>
     <footer mdcDialogFooter>
       <button mdcButton mdcDialogCancel>关闭</button>
-      <button mdcButton mdcDialogAccept (click)="copyResult()">复制</button>
     </footer>
   </div>
   <div mdcDialogBackdrop></div>
