@@ -56,7 +56,10 @@
         </button>
       </div>
       <div>
-        <div mdcTextField style="min-width: 120px;max-width: calc(100% - 110px);">
+        <div
+          mdcTextField
+          style="min-width: 120px; max-width: calc(100% - 110px);"
+        >
           <input #PresetName mdcTextFieldInput type="text" />
           <label mdcFloatingLabel>预设名称</label>
         </div>
@@ -84,6 +87,33 @@
       <button mdcButton raised (click)="invert(MainZone)">反选</button>
     </div>
     <div mdcFormField *ngFor="let Stage of MainZone">
+      <div mdcCheckbox>
+        <input
+          data-checkbox="stage"
+          [value]="stage"
+          mdcCheckboxInput
+          type="checkbox"
+          (click)="change($event, Stage)"
+          [checked]="Stage[1]"
+        />
+      </div>
+      <label mdcFormFieldLabel>{{ Stage[0] }}</label>
+    </div>
+  </div>
+  <div
+    *ngFor="
+      let Activity of this.willRenderStage.Activity | keyvalue;
+      let i = index
+    "
+    fxLayout="row wrap"
+    fxLayoutAlign="start center"
+  >
+    <div style="width: 100%;">
+      <h3 style="display: inline; margin-right: 15px;">{{ Activity.key }}</h3>
+      <button mdcButton raised (click)="choiceAll(Activity.value)">全选</button>
+      <button mdcButton raised (click)="invert(Activity.value)">反选</button>
+    </div>
+    <div mdcFormField *ngFor="let Stage of Activity.value">
       <div mdcCheckbox>
         <input
           data-checkbox="stage"
