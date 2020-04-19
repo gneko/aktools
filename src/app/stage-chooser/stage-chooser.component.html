@@ -1,9 +1,10 @@
 <li mdcListDivider></li>
-<div fxLayout="column" fxLayoutGap="0.25em">
+<div *ngIf="!exportOrimporting" fxLayout="column" fxLayoutGap="0.25em">
   <div fxHide.lt-md>
     <div fxLayout="row" fxLayoutGap="2%" fxLayoutAlign="start center">
       <button mdcButton raised (click)="choiceAll()">全选</button>
       <button mdcButton raised (click)="invert()">反选</button>
+      <button mdcButton raised (click)="exportOrimporting=true">导入/导出</button>
       <div mdcSelect style="min-width: 120px;">
         <select mdcSelectControl [(ngModel)]="choicePreset">
           <option value="zh_CN" disabled>未选择</option>
@@ -17,13 +18,13 @@
         加载预设
       </button>
       <div mdcTextField style="min-width: 120px;">
-        <input #PresetName mdcTextFieldInput type="text" />
+        <input [(ngModel)]="SavePresetName" mdcTextFieldInput type="text" />
         <label mdcFloatingLabel>预设名称</label>
       </div>
       <button
         mdcButton
         raised
-        (click)="savePreset(PresetName)"
+        (click)="savePreset()"
         style="min-width: 96px;"
       >
         保存预设
@@ -34,6 +35,7 @@
     <div fxLayout="row" fxLayoutGap="2%" fxLayoutAlign="center center">
       <button mdcButton raised (click)="choiceAll()">全选</button>
       <button mdcButton raised (click)="invert()">反选</button>
+      <button mdcButton raised (click)="exportOrimporting=true">导入/导出</button>
     </div>
     <div fxLayout="row wrap" fxLayoutGap="2%" fxLayoutAlign="center center">
       <div>
@@ -60,13 +62,13 @@
           mdcTextField
           style="min-width: 120px; max-width: calc(100% - 110px);"
         >
-          <input #PresetName mdcTextFieldInput type="text" />
+          <input [(ngModel)]="SavePresetName" mdcTextFieldInput type="text" />
           <label mdcFloatingLabel>预设名称</label>
         </div>
         <button
           mdcButton
           raised
-          (click)="savePreset(PresetName)"
+          (click)="savePreset()"
           style="min-width: 96px;"
         >
           保存预设
@@ -75,7 +77,36 @@
     </div>
   </div>
 </div>
-<div fxLayout="column" fxLayoutGap="0.25em">
+<div *ngIf="exportOrimporting" fxLayout="column" fxLayoutAlign="start center">
+  <div fxLayout="row" fxLayoutAlign="center center">
+    <div>
+      <button mdcButton raised dense id="btnReset" (click)="reset()">重置</button>
+      <button mdcButton (click)="exportOrimporting=false">关闭</button>
+    </div>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="center center">
+    <div mdcTextField [dense]="true">
+      <textarea mdcTextFieldInput type="text" rows="5" cols="60" #input1="ngModel"
+        [(ngModel)]="exportedData"></textarea>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center">
+      <button mdcButton raised dense id="btnExport" (click)="copyExport()">复制</button>
+    </div>
+  </div>
+  <div fxLayout="row" class="hint" fxLayoutAlign="center center">
+    <p><small>若未弹出成功提示，或复制失败，请手动复制。</small></p>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="center center">
+    <div mdcTextField [dense]="true">
+      <textarea mdcTextFieldInput type="text" rows="5" cols="60" #input1="ngModel"
+        [(ngModel)]="importedData"></textarea>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="center center">
+      <button mdcButton raised dense id="btnImport" (click)="getImportedData()">导入</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="!exportOrimporting" fxLayout="column" fxLayoutGap="0.25em">
   <div
     *ngFor="let MainZone of this.willRenderStage.Main; let i = index"
     fxLayout="row wrap"
