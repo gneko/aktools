@@ -32,6 +32,7 @@ export class MaterialComponent implements OnInit {
   exportedData = '';
   importedData = '';
   plannerData = '';
+  theme = '';
 
   request: any = {
     owned: null,
@@ -179,6 +180,7 @@ export class MaterialComponent implements OnInit {
       });
       this.calc();
     });
+    this.theme = this.fetchService.getLocalStorage("theme", "white");
   }
 
   getOrDefault(o: any, k: string, v: any = 0) {
@@ -205,7 +207,11 @@ export class MaterialComponent implements OnInit {
     this.request.exclude = this.chooser.exclude;
     this.request.owned = owned;
     this.request.required = required;
-    window.location.href="https://graueneko.gitee.io/planner-proxy/?data="+encodeURIComponent(JSON.stringify(this.request));
+    if (this.theme === "dark") {
+      window.location.href = "https://graueneko.gitee.io/planner-proxy/dark.html?data=" + encodeURIComponent(JSON.stringify(this.request));
+    } else {
+      window.location.href = "https://graueneko.gitee.io/planner-proxy/?data=" + encodeURIComponent(JSON.stringify(this.request));
+    }
     // this.planResult = this.fetchService.postJson('https://planner.penguin-stats.io/plan/',
     //   this.request)
     //   .subscribe(plan => {
