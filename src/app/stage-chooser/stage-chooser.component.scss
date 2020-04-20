@@ -1,3 +1,4 @@
+@import "../styles/custom.scss";
 [mdcFormFieldLabel] {
   width: 45px;
 }
@@ -6,4 +7,12 @@
 }
 [mdcSelect] {
   width: 120px;
+}
+[mdcTextField] {
+  textarea {
+    color: $color-muted;
+    background-color: rgba($color-dark, 0.1);
+    resize: none;
+    // border-color: $color-primary;
+  }
 }
