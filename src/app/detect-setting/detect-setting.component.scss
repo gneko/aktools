@@ -66,7 +66,9 @@ canvas {
   width:100%;
   max-width:  1200px;
 }
-
+.textdiv {
+  color: $color-muted;
+}
 p, input, select {
   color: $color-muted;
 }
@@ -78,14 +80,6 @@ p, input, select {
   color: var(--mdc-theme-on-surface);
 }
 
-.bitchar {
-  font-family: Courier;
-  color: green;
-  
-}
-.bitchar.bcred {
-  color: red;
-}
 [mdcTextField] {
   height: 200px;
   width: 100%;
