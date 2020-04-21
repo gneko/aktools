@@ -46,6 +46,7 @@ export class AppComponent {
     });
 
     this.theme = this.fetchService.getLocalStorage("theme", "dark");
+    this.fetchService.setLocalStorage("theme",this.theme)
     this.switchTheme.setTheme(this.theme);
     this.staticPath = this.fetchService.getStaticPath();
     if (this.checkOS() === 'I') {
