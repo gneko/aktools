@@ -110,9 +110,7 @@ export class StageChooserComponent implements OnInit {
       .getVersionData("StageList.json")
       .subscribe((stageList: StageList) => {
         this.stageList["allStage"] = stageList["allStage"];
-        for (const [key, value] of Object.entries(stageList.preset)) {
-          this.stageList.preset[key] = value;
-        }
+        this.stageList = Object.assign(this.stageList,stageList);
         if (!this.stageList.preset.default)
           this.stageList.preset.default = this.stageList.preset["zh_CN"];
         this.fetchService.setLocalStorage("stageList", this.stageList);
