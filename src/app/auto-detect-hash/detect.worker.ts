@@ -1,6 +1,13 @@
 /// <reference lib="webworker" />
-let ItemHashList = [];
-let NumbersHashList: Array<any> = [{
+interface SourceHashList {
+  id?: string;
+  name?: string;
+  version?: number;
+  hash: number[] | /* version 1 */ number[][] /* version 2 */;
+  count: number;
+}
+let SourceHashList: SourceHashList[] = [];
+let NumbersHashList:any = [{
   "number": 0,
   "hash": [2, 9, 8, 3, 0, 0, 0, 0, 10, 2, 0, 0, 10, 10, 1, 0, 10, 0, 0, 0, 0, 10, 8, 0, 3, 0, 0, 0, 0, 6, 10, 2, 0, 0, 0, 0, 0, 4, 10, 3, 0, 0, 0, 0, 0, 4, 10, 3, 3, 0, 0, 0, 0, 5, 10, 2, 9, 0, 0, 0, 0, 9, 9, 0, 10, 3, 0, 0, 10, 10, 1, 0, 3, 9, 10, 3, 0, 0, 0, 0],
   "count": 10
@@ -34,7 +41,6 @@ let NumbersHashList: Array<any> = [{
   "count": 19
 }, {
   "number": 8,
-
   "hash": [12, 18, 18, 8, 1, 0, 0, 0, 19, 3, 0, 0, 13, 19, 8, 0, 16, 0, 0, 0, 3, 17, 17, 1, 19, 1, 0, 0, 3, 19, 17, 0, 13, 19, 8, 0, 3, 8, 0, 0, 19, 12, 0, 5, 16, 6, 0, 0, 9, 0, 0, 0, 5, 18, 19, 5, 1, 0, 0, 0, 0, 6, 19, 11, 13, 0, 0, 0, 6, 18, 17, 4, 17, 19, 13, 5, 3, 3, 0, 0],
   "count": 19
 }, {
@@ -48,9 +54,18 @@ for (let hash of NumbersHashList) {
     hash.hash = hash.hash.map(v => v / hash.count);
   }
 }
-for (let hash of ItemHashList) {
-  if (hash.hash instanceof Array) {
-    hash.hash = hash.hash.map(v => v / hash.count);
+function initHashData(SourceHashList: SourceHashList[]) {
+  for (let hash of SourceHashList) {
+    if (hash.hash instanceof Array) {
+      switch (hash.version) {
+        case 1:
+          hash.hash = (<number[]>hash.hash).map(v => v / hash.count);
+          break;
+        case 2:
+          hash.hash = (<number[][]>hash.hash).map(v1 => v1.map(v2 => v2 / hash.count));
+          break;
+      }
+    }
   }
 }
 let BoundDatas = [
@@ -70,11 +85,16 @@ let NumberHashList = [];
 let OriginHashList = [];
 function fillPixelData(ImageData) {
   for (let index = 0; index < ImageData.data.length; index += 4) {
-    const r = ImageData.data[index], g = ImageData.data[index + 1], b = ImageData.data[index + 2];
-    const x = Math.floor(index / 4) % ImageData.width, y = Math.floor(Math.floor(index / 4) / ImageData.width)
-    if (BoundDatas.some((val) => {
-      return val.R[0] <= r && val.R[1] >= r && val.G[0] <= g && val.G[1] >= g && val.B[0] <= b && val.B[1] >= b;
-    })) {
+    const r = ImageData.data[index],
+      g = ImageData.data[index + 1],
+      b = ImageData.data[index + 2];
+    const x = Math.floor(index / 4) % ImageData.width,
+      y = Math.floor(Math.floor(index / 4) / ImageData.width);
+    if (
+      BoundDatas.some(val => {
+        return val.R[0] <= r && val.R[1] >= r && val.G[0] <= g && val.G[1] >= g && val.B[0] <= b && val.B[1] >= b;
+      })
+    ) {
       XPoint[x]++;
       YPoint[y]++;
     }
@@ -101,15 +121,20 @@ function analyzeBound() {
       }
     } else if (XBound[XBound.length - 1].length == 1 && WhiteSpace >= 10) {
       XBound[XBound.length - 1][1] = LastBlank;
-      XBound.push([])
+      XBound.push([]);
       WhiteSpace = 0;
     } else if (XBound[XBound.length - 1].length == 1) {
       WhiteSpace++;
     }
   }
   if (XBound[XBound.length - 1].length == 1) {
-    if (Math.abs(((XPoint.length - 1) - XBound[XBound.length - 1][0]) - (XBound[XBound.length - 2][1] - XBound[XBound.length - 2][0])) < 5) {
-      XBound[XBound.length - 1][1] = XPoint.length - 1
+    // 结尾边界丢失补丁
+    if (
+      Math.abs(
+        XPoint.length - 1 - XBound[XBound.length - 1][0] - (XBound[XBound.length - 2][1] - XBound[XBound.length - 2][0])
+      ) < 5
+    ) {
+      XBound[XBound.length - 1][1] = XPoint.length - 1;
     } else {
       XBound.pop();
     }
@@ -120,13 +145,35 @@ function analyzeBound() {
   for (let x = 0; x < XBound.length; x++) {
     MaxWidthinLine.push(XBound[x][1] - XBound[x][0]);
   }
-  let mw = Math.round(MaxWidthinLine.reduce((a, b) => a + b) / MaxWidthinLine.length);
+  let mw:number;
+  // 补丁2 技巧概要边界
+  for (let x = 0; x < XBound.length; x++) {
+    if(x==0) continue;
+    if (XBound[x-1][1]-XBound[x-1][0] < 50 && XBound[x][1]-XBound[x][0] < 50) {
+      MaxWidthinLine = []
+      for (let xa = 0; xa < XBound.length; xa++) {
+        if(xa==x-1||xa==x) continue;
+        MaxWidthinLine.push(XBound[xa][1] - XBound[xa][0]);
+      }
+      mw=Math.round(MaxWidthinLine.reduce((a, b) => a + b) / MaxWidthinLine.length);
+      if (Math.abs(XBound[x][1] - XBound[x-1][0] - mw) < 20) {
+        XBound.splice(x-1,2,[XBound[x-1][0],XBound[x][1]]);
+        x=x-1;
+      }
+    }
+  }
+  // 补丁1 修复大小误差
+  MaxWidthinLine = [];
+  for (let x = 0; x < XBound.length; x++) {
+    MaxWidthinLine.push(XBound[x][1] - XBound[x][0]);
+  }
+  mw = Math.round(MaxWidthinLine.reduce((a, b) => a + b) / MaxWidthinLine.length);
   for (let x = 0; x < XBound.length; x++) {
     if (XBound[x][1] - XBound[x][0] < 50) {
-      XBound.splice(x, 1)
+      XBound.splice(x, 1);
       x--;
     } else {
-      if (Math.abs((XBound[x][1] - XBound[x][0]) - mw) > 20) {
+      if (Math.abs(XBound[x][1] - XBound[x][0] - mw) > 20) {
         XBound[x][1] = XBound[x][0] + Math.max(...MaxWidthinLine);
       }
     }
@@ -141,33 +188,29 @@ function analyzeBound() {
       LastBlank = y;
     } else if (YBound[YBound.length - 1].length == 1 && WhiteSpace >= 10) {
       YBound[YBound.length - 1][1] = LastBlank;
-      YBound.push([])
+      YBound.push([]);
       WhiteSpace = 0;
     } else if (YBound[YBound.length - 1].length == 1) {
       WhiteSpace++;
     }
   }
   if (YBound[YBound.length - 1].length == 1) {
-    YBound[YBound.length - 1][1] = YPoint.length - 1
+    YBound[YBound.length - 1][1] = YPoint.length - 1;
   } else {
     YBound.pop();
   }
   for (let y = 0; y < YBound.length; y++) {
     if (YBound[y][1] - YBound[y][0] < 50) {
-      YBound.splice(y, 1)
+      YBound.splice(y, 1);
       y--;
     }
   }
 }
-addEventListener('message', (message) => {
+addEventListener("message", message => {
   switch (message.data.method) {
     case "LoadHashData":
-      ItemHashList = message.data.Data;
-      for (let hash of ItemHashList) {
-        if (hash.hash instanceof Array) {
-          hash.hash = hash.hash.map(v => v / hash.count);
-        }
-      }
+      SourceHashList = message.data.Data;
+      initHashData(SourceHashList);
       break;
     case "ImageDataLoad":
       postMessage({ text: "图像数据预处理 - 边界识别", progress: 0.1 });
@@ -187,11 +230,15 @@ addEventListener('message', (message) => {
     case "calcDhash":
       if (typeof message.data.index != "undefined" && OriginHashList.length !== 0) {
         let hash = OriginHashList[message.data.index];
-        const ConfidenceFilter = ItemHashList.map((hashs) => {
+        const ConfidenceFilter = SourceHashList.map(hashs => {
           let Confidence = 0;
           let AllLength = 144;
           for (let i = 0; i < hash.length; i++) {
-            if (hash[i] == "1") { Confidence += hashs.hash[i]; } else { Confidence += 1 - hashs.hash[i]; }
+            if (hash[i] == "1") {
+              Confidence += <number>hashs.hash[i];
+            } else {
+              Confidence += 1 - <number>hashs.hash[i];
+            }
           }
           Confidence /= AllLength;
           let TempDataBuffer: any = {
@@ -199,12 +246,14 @@ addEventListener('message', (message) => {
             hash: hashs.hash,
             confidence: Confidence,
             count: hashs.count
-          } // 深拷贝
-          if (hashs.name) { TempDataBuffer.name = hashs.name }
+          }; // 深拷贝
+          if (hashs.name) {
+            TempDataBuffer.name = hashs.name;
+          }
           return TempDataBuffer;
         }).sort((a, b) => {
-          return b.confidence - a.confidence
-        })
+          return b.confidence - a.confidence;
+        });
         if (ConfidenceFilter[0].confidence <= 0.75) {
           ConfidenceFilter.unshift({
             id: "0000",
@@ -219,22 +268,29 @@ addEventListener('message', (message) => {
           let HashString = "";
           for (let index = 0; index < item.data.length; index += 4) {
             if (Math.floor(index / 4) % item.width == 0) continue;
-            if (Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) > Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)) {
-              HashString += 1
+            if (
+              Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) >
+              Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)
+            ) {
+              HashString += 1;
             } else {
-              HashString += 0
+              HashString += 0;
             }
           }
-          return HashString
+          return HashString;
         });
         OriginHashList = [...HashList];
         postMessage({ method: "status", text: "正在判断图像对应的物品", progress: 0.45 });
         HashList = HashList.map((hash: String) => {
-          const ConfidenceFilter = ItemHashList.map((hashs) => {
+          const ConfidenceFilter = SourceHashList.map(hashs => {
             let Confidence = 0;
             let AllLength = 144;
             for (let i = 0; i < hash.length; i++) {
-              if (hash[i] == "1") { Confidence += hashs.hash[i]; } else { Confidence += 1 - hashs.hash[i]; }
+              if (hash[i] == "1") {
+                Confidence += <number>hashs.hash[i];
+              } else {
+                Confidence += 1 - <number>hashs.hash[i];
+              }
             }
             Confidence /= AllLength;
             let TempDataBuffer: any = {
@@ -242,12 +298,14 @@ addEventListener('message', (message) => {
               hash: hashs.hash,
               confidence: Confidence,
               count: hashs.count
-            } // 深拷贝
-            if (hashs.name) { TempDataBuffer.name = hashs.name }
+            }; // 深拷贝
+            if (hashs.name) {
+              TempDataBuffer.name = hashs.name;
+            }
             return TempDataBuffer;
           }).sort((a, b) => {
-            return b.confidence - a.confidence
-          })
+            return b.confidence - a.confidence;
+          });
           if (ConfidenceFilter[0].confidence <= 0.75) {
             ConfidenceFilter.unshift({
               id: "0000",
@@ -264,45 +322,58 @@ addEventListener('message', (message) => {
       break;
     case "getItemCount":
       postMessage({ method: "status", text: "正在识别物品数量", progress: 0.6 });
-      NumberHashList = message.data.ImageDatas.map((v) => {
+      NumberHashList = message.data.ImageDatas.map(v => {
         return v.map((item: ImageData) => {
           let HashString = "";
           for (let index = 0; index < item.data.length; index += 4) {
             if (Math.floor(index / 4) % item.width == 0) continue;
-            if (Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) > Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)) {
-              HashString += 1
+            if (
+              Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) >
+              Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)
+            ) {
+              HashString += 1;
             } else {
-              HashString += 0
+              HashString += 0;
             }
           }
-          return HashString
+          return HashString;
         });
       });
-      let Numbers = NumberHashList.map((Items) => {
-        return Number(Items.map((hash) => {
-          let MaybeNumbers = NumbersHashList.map((hashs) => {
-            let Confidence = 0;
-            let AllLength = 80;
-            for (let i = 0; i < hash.length; i++) {
-              if (hash[i] == "1") { Confidence += hashs.hash[i] } else { Confidence += 1 - hashs.hash[i] }
+      let Numbers = NumberHashList.map(Items => {
+        return Number(
+          Items.map(hash => {
+            let MaybeNumbers = NumbersHashList.map(hashs => {
+              let Confidence = 0;
+              let AllLength = 80;
+              for (let i = 0; i < hash.length; i++) {
+                if (hash[i] == "1") {
+                  Confidence += hashs.hash[i];
+                } else {
+                  Confidence += 1 - hashs.hash[i];
+                }
+              }
+              Confidence /= AllLength;
+              hashs.confidence = Confidence;
+              return hashs;
+            }).sort((a, b) => {
+              return b.confidence - a.confidence;
+            });
+            if (MaybeNumbers[0].confidence > 0.785) {
+              return MaybeNumbers[0].number;
+            } else {
+              return null;
             }
-            Confidence /= AllLength;
-            hashs.confidence = Confidence;
-            return hashs;
-          }).sort((a, b) => {
-            return b.confidence - a.confidence
-          })
-          if (MaybeNumbers[0].confidence > 0.785) {
-            return MaybeNumbers[0].number;
-          } else {
-            return null;
-          }
-        }).join(""))
+          }).join("")
+        );
       });
       postMessage({ method: "status", text: "识别完成，点击下方物品可以进行修改。", progress: 1 });
       postMessage({ method: "DetectResult", NumberResult: Numbers, Items: HashList });
       break;
     case "getItemHashs":
-      postMessage({ method: "SingleItemHash", Item: HashList[message.data.index], OriginHash: OriginHashList[message.data.index] });
+      postMessage({
+        method: "SingleItemHash",
+        Item: HashList[message.data.index],
+        OriginHash: OriginHashList[message.data.index]
+      });
   }
 });

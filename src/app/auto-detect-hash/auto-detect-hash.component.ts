@@ -2,10 +2,17 @@ import { Component, OnInit, ElementRef } from "@angular/core";
 import { MdcSnackbarService } from "@blox/material";
 import { FetchService } from "../fetch.service";
 import { Router } from "@angular/router";
+interface SourceHashList {
+  id?: string;
+  name?: string;
+  version?: number;
+  hash: number[] | /* version 1 */ number[][] /* version 2 */;
+  count: number;
+}
 @Component({
   selector: "app-auto-detect",
   templateUrl: "./auto-detect-hash.component.html",
-  styleUrls: ["./auto-detect-hash.component.scss"],
+  styleUrls: ["./auto-detect-hash.component.scss"]
 })
 export class AutoDetectHashComponent implements OnInit {
   //tslint:disable: all
@@ -29,52 +36,47 @@ export class AutoDetectHashComponent implements OnInit {
   Modifying = { x: 0, y: 0 };
   ItemNames: object;
   detectedItemList = [];
-  ItemHashList: any[] = [];
+  SourceHashList: SourceHashList[] = [];
   Lock = false;
   constructor(
     private fetchService: FetchService,
     private snackbar: MdcSnackbarService,
     private router: Router,
     private el: ElementRef
-  ) {}
+  ) { }
 
   async ngOnInit() {
-    this.fetchService
-      .getVersionData("detectdata.json")
-      .subscribe((Hashdata) => {
-        this.ItemHashList = [...Hashdata];
-        this.fetchService.getVersionData("material.json").subscribe((data) => {
-          const idata = this.fetchService.getLocalStorage("m-data", {});
-          const initIdata = Object.keys(idata).length === 0;
-          this.ItemNames = { "0000": "该位置无物品" };
-          for (const i in data) {
-            if (initIdata) {
-              idata[data[i].name] = {
-                have: 0,
-                need: 0,
-                lack: 0,
-                canMerge: false,
-                name: data[i].name,
-              };
-            }
-            if (data[i]) {
-              this.ItemNames[data[i].id] = data[i].name;
-            }
-          }
+    this.fetchService.getVersionData("detectdata.json").subscribe(Hashdata => {
+      this.SourceHashList = [...Hashdata];
+      this.fetchService.getVersionData("material.json").subscribe(data => {
+        const idata = this.fetchService.getLocalStorage("m-data", {});
+        const initIdata = Object.keys(idata).length === 0;
+        this.ItemNames = { "0000": "该位置无物品" };
+        for (const i in data) {
           if (initIdata) {
-            this.fetchService.setLocalStorage("m-data", idata);
+            idata[data[i].name] = {
+              have: 0,
+              need: 0,
+              lack: 0,
+              canMerge: false,
+              name: data[i].name
+            };
           }
-          this.registerWorker();
-        });
+          if (data[i]) {
+            this.ItemNames[data[i].id] = data[i].name;
+          }
+        }
+        if (initIdata) {
+          this.fetchService.setLocalStorage("m-data", idata);
+        }
+        this.registerWorker();
       });
+    });
     this.ImageElement = document.createElement("img");
     this.Canvas = this.el.nativeElement.getElementsByTagName("canvas")[0];
     this.Ctx = this.Canvas.getContext("2d");
     this.MaxFontSize = this.fetchService.getLocalStorage("detect-mfs", true);
-    this.textColor = this.fetchService.getLocalStorage(
-      "detect-tclr",
-      "#00ff00"
-    );
+    this.textColor = this.fetchService.getLocalStorage("detect-tclr", "#00ff00");
     this.onPasteImage();
   }
   ModifyData(dialog: any, e: MouseEvent) {
@@ -111,14 +113,14 @@ export class AutoDetectHashComponent implements OnInit {
     this.ModifyingItem = this.detectedItemList[y][x]; // 确定正在修改的物品
     for (const id of Object.keys(this.ItemNames)) {
       if (
-        !this.ModifyingItem.item.some((a) => {
+        !this.ModifyingItem.item.some(a => {
           return a.id == id;
         })
       ) {
         this.ModifyingItem.item.push({
           id,
           hash: new Array(144).fill(0),
-          count: 0,
+          count: 0
         });
       }
     }
@@ -136,13 +138,12 @@ export class AutoDetectHashComponent implements OnInit {
     dialog.open();
   }
   get ModifyingConfidence() {
-    let tempData = this.ModifyingItem.item.find((v) => v.id == this.ModifyBuffer.id);
-    if(!tempData) {
+    let tempData = this.ModifyingItem.item.find(v => v.id == this.ModifyBuffer.id);
+    if (!tempData) {
       return 0;
     }
-    if(!("confidence" in tempData)){
+    if (!("confidence" in tempData)) {
       tempData.confidence = 0;
-
     }
     return tempData.confidence;
   }
@@ -191,19 +192,19 @@ export class AutoDetectHashComponent implements OnInit {
   choiceImage(event) {
     const ImageContainer = event.target;
     const Reader = new FileReader();
-    Reader.onload = (e) => {
+    Reader.onload = e => {
       this.LoadImage(Reader.result.toString());
     };
     Reader.readAsDataURL(ImageContainer.files[0]);
   }
   onPasteImage() {
-    document.addEventListener("paste", (event) => {
+    document.addEventListener("paste", event => {
       const items = event.clipboardData && event.clipboardData.items;
       if (items && items.length) {
         if (items[0].type.indexOf("image") !== -1) {
           const file = items[0].getAsFile();
           const Reader = new FileReader();
-          Reader.onload = (e) => {
+          Reader.onload = e => {
             this.LoadImage(Reader.result.toString());
           };
           Reader.readAsDataURL(file);
@@ -217,7 +218,7 @@ export class AutoDetectHashComponent implements OnInit {
         message: "材料为空，请先输入需求。",
         actionText: "好的",
         multiline: false,
-        actionOnBottom: false,
+        actionOnBottom: false
       });
       return;
     }
@@ -230,9 +231,7 @@ export class AutoDetectHashComponent implements OnInit {
           this.detectedItemList[y][x].have !== 0 &&
           !this.detectedItemList[y][x].delete
         ) {
-          data[
-            this.ItemNames[this.detectedItemList[y][x].id]
-          ].have = this.detectedItemList[y][x].have;
+          data[this.ItemNames[this.detectedItemList[y][x].id]].have = this.detectedItemList[y][x].have;
         }
       }
     }
@@ -241,13 +240,13 @@ export class AutoDetectHashComponent implements OnInit {
       message: "导入成功",
       actionText: "好的",
       multiline: false,
-      actionOnBottom: false,
+      actionOnBottom: false
     });
     this.router.navigateByUrl("/material");
   }
   LoadImage(src: string) {
     this.reset();
-    this.ImageElement.onload = (e) => {
+    this.ImageElement.onload = e => {
       this.ImageLoaded = true;
       this.Canvas.width = this.ImageElement.width;
       this.Canvas.height = this.ImageElement.height;
@@ -266,50 +265,46 @@ export class AutoDetectHashComponent implements OnInit {
     this.ModifyBuffer = { have: 0, delete: false };
     this.Modifying = { x: 0, y: 0 };
     this.detectedItemList = [];
-    this.ItemHashList = [];
+    this.SourceHashList = [];
     this.Lock = false;
   }
   registerWorker() {
     this.worker = new Worker("./detect.worker", { type: "module" });
     this.worker.onmessage = this.MessageDeal.bind(this);
-    let ItemHashList =
+    let SourceHashList =
       JSON.parse(localStorage.getItem("detect-setting")) ||
-      Boolean(
-        localStorage.setItem(
-          "detect-setting",
-          JSON.stringify(this.ItemHashList)
-        )
-      ) ||
-      this.ItemHashList;
-    if (ItemHashList !== this.ItemHashList) {
-      const sl = ItemHashList.length;
-      for (let i = 0; i < this.ItemHashList.length; i++) {
+      Boolean(localStorage.setItem("detect-setting", JSON.stringify(this.SourceHashList))) ||
+      this.SourceHashList;
+    if (SourceHashList !== this.SourceHashList) {
+      const sl = SourceHashList.length;
+      for (let i = 0; i < this.SourceHashList.length; i++) {
         if (
-          !ItemHashList.some((v) => {
-            return v.id == this.ItemHashList[i].id;
+          !SourceHashList.some(v => {
+            return v.id == this.SourceHashList[i].id;
           })
         ) {
-          ItemHashList.push(this.ItemHashList[i]);
+          SourceHashList.push(this.SourceHashList[i]);
         }
       }
-      if (sl != ItemHashList.length) {
-        localStorage.setItem(
-          "detect-setting",
-          JSON.stringify(this.ItemHashList)
-        );
+      if (sl != SourceHashList.length) {
+        localStorage.setItem("detect-setting", JSON.stringify(this.SourceHashList));
       }
-      this.ItemHashList = ItemHashList;
+      this.SourceHashList = SourceHashList;
     }
+    SourceHashList = SourceHashList.map(v => {
+      if (!v.version) v.version = 1;
+      return v
+    })
     this.worker.postMessage({
       method: "LoadHashData",
-      Data: this.ItemHashList,
+      Data: this.SourceHashList
     });
   }
   objectRegonition() {
     this.Lock = true;
     this.worker.postMessage({
       method: "ImageDataLoad",
-      data: this.Ctx.getImageData(0, 0, this.Canvas.width, this.Canvas.height),
+      data: this.Ctx.getImageData(0, 0, this.Canvas.width, this.Canvas.height)
     });
   }
   MessageDeal(message: MessageEvent) {
@@ -345,26 +340,9 @@ export class AutoDetectHashComponent implements OnInit {
             DhashCanvas.width = 13;
             DhashCanvas.height = 12;
             const DhashCtx = DhashCanvas.getContext("2d");
-            DhashCtx.drawImage(
-              Canvas,
-              0,
-              0,
-              Canvas.width,
-              Canvas.height,
-              0,
-              0,
-              DhashCanvas.width,
-              DhashCanvas.height
-            );
-            ImageDatas.push(
-              DhashCtx.getImageData(0, 0, DhashCanvas.width, DhashCanvas.height)
-            );
-            this.Ctx.strokeRect(
-              this.XBound[x][0],
-              this.YBound[y][0],
-              Canvas.width,
-              Canvas.height
-            );
+            DhashCtx.drawImage(Canvas, 0, 0, Canvas.width, Canvas.height, 0, 0, DhashCanvas.width, DhashCanvas.height);
+            ImageDatas.push(DhashCtx.getImageData(0, 0, DhashCanvas.width, DhashCanvas.height));
+            this.Ctx.strokeRect(this.XBound[x][0], this.YBound[y][0], Canvas.width, Canvas.height);
           }
         }
         this.worker.postMessage({ method: "calcDhash", ImageDatas }); // 请求生成物品dHash
@@ -378,17 +356,13 @@ export class AutoDetectHashComponent implements OnInit {
         for (let y = 0; y < this.YBound.length; y++) {
           for (let x = 0; x < this.XBound.length; x++) {
             const Canvas = document.createElement("canvas");
-            Canvas.width =
-              (this.XBound[x][1] - this.XBound[x][0]) * (1 - NumberLeft);
-            Canvas.height =
-              (this.YBound[y][1] - this.YBound[y][0]) * NumberHeight;
+            Canvas.width = (this.XBound[x][1] - this.XBound[x][0]) * (1 - NumberLeft);
+            Canvas.height = (this.YBound[y][1] - this.YBound[y][0]) * NumberHeight;
             const ctx = Canvas.getContext("2d");
             ctx.drawImage(
               this.ImageElement,
-              this.XBound[x][0] +
-                (this.XBound[x][1] - this.XBound[x][0]) * NumberLeft,
-              this.YBound[y][0] +
-                (this.YBound[y][1] - this.YBound[y][0]) * NumberTop,
+              this.XBound[x][0] + (this.XBound[x][1] - this.XBound[x][0]) * NumberLeft,
+              this.YBound[y][0] + (this.YBound[y][1] - this.YBound[y][0]) * NumberTop,
               Canvas.width,
               Canvas.height,
               0,
@@ -396,12 +370,7 @@ export class AutoDetectHashComponent implements OnInit {
               Canvas.width,
               Canvas.height
             );
-            const allNumberImageData = ctx.getImageData(
-              0,
-              0,
-              Canvas.width,
-              Canvas.height
-            );
+            const allNumberImageData = ctx.getImageData(0, 0, Canvas.width, Canvas.height);
             const data = allNumberImageData.data;
             const [...backupdata] = data;
             const SData = [];
@@ -411,31 +380,19 @@ export class AutoDetectHashComponent implements OnInit {
             }
             // 预处理图像
             for (let i = 0; i < data.length; i += 4) {
-              const grey =
-                (backupdata[i] + backupdata[i + 1] + backupdata[i + 2]) / 3;
+              const grey = (backupdata[i] + backupdata[i + 1] + backupdata[i + 2]) / 3;
               const xa = Math.floor(i / 4) % allNumberImageData.width,
                 ya = Math.floor(Math.floor(i / 4) / allNumberImageData.width);
               if (grey >= 120) {
                 SData[ya][xa] = 1;
               } else if (grey < 120 && grey > 105) {
-                const left =
-                  (backupdata[i - 4] + backupdata[i - 3] + backupdata[i - 2]) /
-                  3;
-                const right =
-                  (backupdata[i + 4] + backupdata[i + 5] + backupdata[i + 6]) /
-                  3;
+                const left = (backupdata[i - 4] + backupdata[i - 3] + backupdata[i - 2]) / 3;
+                const right = (backupdata[i + 4] + backupdata[i + 5] + backupdata[i + 6]) / 3;
                 const TopIndex = i + allNumberImageData.width * 4;
                 const BottemIndex = i + allNumberImageData.width * 4;
-                const top =
-                  (backupdata[TopIndex] +
-                    backupdata[TopIndex + 1] +
-                    backupdata[TopIndex + 2]) /
-                  3;
+                const top = (backupdata[TopIndex] + backupdata[TopIndex + 1] + backupdata[TopIndex + 2]) / 3;
                 const bottom =
-                  (backupdata[BottemIndex] +
-                    backupdata[BottemIndex + 1] +
-                    backupdata[BottemIndex + 2]) /
-                  3;
+                  (backupdata[BottemIndex] + backupdata[BottemIndex + 1] + backupdata[BottemIndex + 2]) / 3;
                 if (
                   (xa !== 0 && left > 120) ||
                   (xa !== allNumberImageData.width - 1 && right > 120) ||
@@ -458,16 +415,14 @@ export class AutoDetectHashComponent implements OnInit {
                   const NearPoints = [
                     yb === 0 || xb === 0 ? 0 : SData[yb - 1][xb - 1],
                     yb === 0 ? 0 : SData[yb - 1][xb],
-                    yb === 0 || xb === SData[yb].length - 1
-                      ? 0
-                      : SData[yb - 1][xb + 1],
-                    xb === 0 ? 0 : SData[yb][xb - 1],
+                    yb === 0 || xb === SData[yb].length - 1 ? 0 : SData[yb - 1][xb + 1],
+                    xb === 0 ? 0 : SData[yb][xb - 1]
                   ]; // 左上 上 右上 左
                   if (NearPoints.reduce((a, b) => a + b) === 0) {
                     SData[yb][xb] = ++Label;
                     continue;
                   }
-                  const NotZeroPoints = NearPoints.filter((v) => v);
+                  const NotZeroPoints = NearPoints.filter(v => v);
                   if (
                     NotZeroPoints.every((v, index, arr) => {
                       return index === 0 || v === arr[index - 1];
@@ -504,9 +459,7 @@ export class AutoDetectHashComponent implements OnInit {
                   }
                 }
                 if (LIndex !== -1) {
-                  NewLabel[LIndex] = [
-                    ...new Set(NewLabel[LIndex].concat(Sets)),
-                  ];
+                  NewLabel[LIndex] = [...new Set(NewLabel[LIndex].concat(Sets))];
                 } else {
                   NewLabel.push(Sets);
                 }
@@ -517,17 +470,12 @@ export class AutoDetectHashComponent implements OnInit {
             }
             const Bounds: Array<Array<number>> = [];
             for (let i = 0; i < NewLabel.length; i++) {
-              Bounds.push([
-                Infinity /* 左 */,
-                Infinity /* 上 */,
-                -Infinity /* 右 */,
-                -Infinity /* 下 */,
-              ]);
+              Bounds.push([Infinity /* 左 */, Infinity /* 上 */, -Infinity /* 右 */, -Infinity /* 下 */]);
             }
             for (let yb = 0; yb < SData.length; yb++) {
               for (let xb = 0; xb < SData[yb].length; xb++) {
                 if (SData[yb][xb] !== 0) {
-                  const Label = NewLabel.findIndex((v) => {
+                  const Label = NewLabel.findIndex(v => {
                     return v.includes(SData[yb][xb]);
                   });
                   SData[yb][xb] = Label + 1;
@@ -546,7 +494,7 @@ export class AutoDetectHashComponent implements OnInit {
                 })
               );
               if (
-                isInf === Infinity ||
+                !Number.isFinite(isInf) ||
                 Bound[0] <= 2 ||
                 allNumberImageData.width - Bound[2] <= 2 ||
                 Bound[1] < 2 ||
@@ -562,11 +510,7 @@ export class AutoDetectHashComponent implements OnInit {
                 continue;
               }
               SingleNumberImageDatas.push(
-                new ImageData(
-                  new Uint8ClampedArray(width * height * 4).fill(255),
-                  width,
-                  height
-                )
+                new ImageData(new Uint8ClampedArray(width * height * 4).fill(255), width, height)
               );
             }
             // 重新绘制数字便于识别
@@ -578,24 +522,14 @@ export class AutoDetectHashComponent implements OnInit {
                   }
                   const yc = yb - Bounds[SData[yb][xb] - 1][1],
                     xc = xb - Bounds[SData[yb][xb] - 1][0];
-                  const index =
-                    (yc * SingleNumberImageDatas[SData[yb][xb] - 1].width +
-                      xc) *
-                    4;
-                  SingleNumberImageDatas[SData[yb][xb] - 1].data.fill(
-                    0,
-                    index,
-                    index + 3
-                  );
+                  const index = (yc * SingleNumberImageDatas[SData[yb][xb] - 1].width + xc) * 4;
+                  SingleNumberImageDatas[SData[yb][xb] - 1].data.fill(0, index, index + 3);
                 }
               }
             }
-            SingleNumberImageDatas = SingleNumberImageDatas.map((v, i) => [
-              Bounds[i][0],
-              v,
-            ])
+            SingleNumberImageDatas = SingleNumberImageDatas.map((v, i) => [Bounds[i][0], v])
               .sort((a, b) => a[0] - b[0])
-              .map((v) => v[1]);
+              .map(v => v[1]);
             const SingleNumberCtx: Array<CanvasRenderingContext2D> = [];
             const ImageIndex = SingleNumberClipImageDatas.push([]) - 1;
             for (const SingleNumberImageData of SingleNumberImageDatas) {
@@ -612,17 +546,7 @@ export class AutoDetectHashComponent implements OnInit {
               ClipCanvas.width = 9;
               ClipCanvas.height = 10;
               const ClipCtx = ClipCanvas.getContext("2d");
-              ClipCtx.drawImage(
-                Canvas,
-                0,
-                0,
-                Canvas.width,
-                Canvas.height,
-                0,
-                0,
-                ClipCanvas.width,
-                ClipCanvas.height
-              );
+              ClipCtx.drawImage(Canvas, 0, 0, Canvas.width, Canvas.height, 0, 0, ClipCanvas.width, ClipCanvas.height);
               SingleNumberClipImageDatas[ImageIndex].push(
                 ClipCtx.getImageData(0, 0, ClipCanvas.width, ClipCanvas.height)
               );
@@ -631,7 +555,7 @@ export class AutoDetectHashComponent implements OnInit {
         }
         this.worker.postMessage({
           method: "getItemCount",
-          ImageDatas: SingleNumberClipImageDatas,
+          ImageDatas: SingleNumberClipImageDatas
         }); // 请求识别数字
         break;
       case "DetectResult":
@@ -642,17 +566,10 @@ export class AutoDetectHashComponent implements OnInit {
           for (let x = 0; x < this.XBound.length; x++) {
             this.detectedItemList[y][x] = {
               id: message.data.Items[y * this.XBound.length + x][0].id,
-              name: this.ItemNames[
-                message.data.Items[y * this.XBound.length + x][0].id
-              ],
+              name: this.ItemNames[message.data.Items[y * this.XBound.length + x][0].id],
               have: message.data.NumberResult[y * this.XBound.length + x],
-              item: message.data.Items[y * this.XBound.length + x].filter(
-                (a) => a.id in this.ItemNames
-              ),
-              delete: !(
-                message.data.Items[y * this.XBound.length + x][0].id in
-                this.ItemNames
-              ),
+              item: message.data.Items[y * this.XBound.length + x].filter(a => a.id in this.ItemNames),
+              delete: !(message.data.Items[y * this.XBound.length + x][0].id in this.ItemNames)
             };
           }
         }
@@ -667,21 +584,14 @@ export class AutoDetectHashComponent implements OnInit {
     if (pos.length === 0) {
       for (let y = 0, Yall = this.detectedItemList.length; y < Yall; y++) {
         for (let x = 0, Xall = this.detectedItemList[y].length; x < Xall; x++) {
-          if (
-            this.detectedItemList[y][x].id == "0000" ||
-            !(this.detectedItemList[y][x].id in this.ItemNames)
-          ) {
+          if (this.detectedItemList[y][x].id == "0000" || !(this.detectedItemList[y][x].id in this.ItemNames)) {
             continue;
           }
           const width = this.XBound[x][1] - this.XBound[x][0];
           const height = this.YBound[y][1] - this.YBound[y][0];
           const NumberString = this.detectedItemList[y][x].have.toString();
           const fontSize = Math.min(
-            this.getSuitFontSize(
-              this.ItemNames[this.detectedItemList[y][x].id],
-              width,
-              height
-            ),
+            this.getSuitFontSize(this.ItemNames[this.detectedItemList[y][x].id], width, height),
             this.getSuitFontSize(NumberString, width, height)
           );
           this.Ctx.font = fontSize + "px serif";
@@ -700,10 +610,7 @@ export class AutoDetectHashComponent implements OnInit {
     } else {
       const x = pos[0];
       const y = pos[1];
-      if (
-        this.detectedItemList[y][x].id == "0000" ||
-        !(this.detectedItemList[y][x].id in this.ItemNames)
-      ) {
+      if (this.detectedItemList[y][x].id == "0000" || !(this.detectedItemList[y][x].id in this.ItemNames)) {
         return void 0;
       }
       const width = this.XBound[x][1] - this.XBound[x][0];
@@ -711,11 +618,7 @@ export class AutoDetectHashComponent implements OnInit {
       const NumberString = this.detectedItemList[y][x].have.toString();
       // this.Ctx.font = this.getSuitFontSize(NumberString, width) + 'px serif';
       const fontSize = Math.min(
-        this.getSuitFontSize(
-          this.ItemNames[this.detectedItemList[y][x].id],
-          width,
-          height
-        ),
+        this.getSuitFontSize(this.ItemNames[this.detectedItemList[y][x].id], width, height),
         this.getSuitFontSize(NumberString, width, height)
       );
       this.Ctx.font = fontSize + "px serif";
@@ -746,10 +649,7 @@ export class AutoDetectHashComponent implements OnInit {
     let BaseFontSize = 10;
     while (true) {
       this.Ctx.font = BaseFontSize + "px serif";
-      if (
-        this.Ctx.measureText(text).width > width ||
-        BaseFontSize * 2 + 10 > height
-      ) {
+      if (this.Ctx.measureText(text).width > width || BaseFontSize * 2 + 10 > height) {
         return BaseFontSize - 1;
       }
       BaseFontSize++;
