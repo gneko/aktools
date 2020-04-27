@@ -2,6 +2,13 @@ import { Component, OnInit, ElementRef } from "@angular/core";
 import { MdcSnackbarService, MdcDialogDirective } from "@blox/material";
 import { FetchService } from "../fetch.service";
 import { Router } from "@angular/router";
+interface SourceHashList {
+  id?: string;
+  name?: string;
+  version?: number;
+  hash: number[] | /* version 1 */ number[][] /* version 2 */;
+  count?: number;
+}
 @Component({
   selector: "app-detect-setting",
   templateUrl: "./detect-setting.component.html",
@@ -31,16 +38,17 @@ export class DetectSetttingComponent implements OnInit {
   ItemNames: Object;
   detectedItem = [];
   Lock = false;
-  ItemHashList: any = [];
+  ItemHashList: SourceHashList[] = [];
   RecordItemHash: {
     [id: string]: {
       id?: string;
       name?: string;
-      hash: Array<number>;
-      count: number;
+      version?: number;
+      hash: number[] | /* version 1 */ number[][] /* version 2 */;
+      count?: number;
     };
   } = {};
-  OriginHash: number[] = [];
+  OriginHash: any = [];
   ImageDatas: any[];
   hashCompareCanvas = document.createElement("canvas");
   hashCompareCtx: CanvasRenderingContext2D;
@@ -50,7 +58,7 @@ export class DetectSetttingComponent implements OnInit {
     private snackbar: MdcSnackbarService,
     private router: Router,
     private el: ElementRef
-  ) {}
+  ) { }
 
   async ngOnInit() {
     this.fetchService.getVersionData("material.json").subscribe((data) => {
@@ -175,8 +183,17 @@ export class DetectSetttingComponent implements OnInit {
       };
     }
   }
+  mergeHashV2(target:SourceHashList,data:SourceHashList) {
+    target.hash=(<number[][]>target.hash).map((color,colorindex)=>{
+      return color.map((hashvalue,hashindex)=>{
+        return hashvalue + data.hash[colorindex][hashindex];
+      })
+    })
+    target.count++;
+    return target;
+  }
   registerWorker() {
-    this.worker = new Worker("../auto-detect-hash/detect.worker", {type: "module"});
+    this.worker = new Worker("../auto-detect-hash/detect.worker", { type: "module" });
     this.worker.onmessage = this.MessageDeal.bind(this);
     this.ItemHashList =
       JSON.parse(localStorage.getItem("detect-setting")) ||
@@ -209,16 +226,25 @@ export class DetectSetttingComponent implements OnInit {
     });
     for (let item of this.ItemHashList) {
       this.RecordItemHash[item.id] = {
-        hash: item.hash.map((v) => v / item.count),
         count: item.count,
+        hash: []
       };
+      switch (item.version) {
+        case 1:
+          Object.assign(this.RecordItemHash[item.id], { hash: (<number[]>item.hash).map(v => Number(v) / item.count), version: item.version });
+          break;
+        case 2:
+          Object.assign(this.RecordItemHash[item.id], { hash: (<number[][]>item.hash).map(v1 => v1.map(v2 => Number(v2) / item.count)), version: item.version });
+          break;
+      }
     }
     for (const id in this.ItemNames) {
       if (this.ItemNames[id]) {
         if (!(id in this.RecordItemHash)) {
           this.RecordItemHash[id] = {
             id: id,
-            hash: new Array(144).fill(0),
+            hash: [new Array(144).fill(0), new Array(144).fill(0), new Array(144).fill(0)],
+            version: 1,
             count: 0,
           };
         }
@@ -305,9 +331,15 @@ export class DetectSetttingComponent implements OnInit {
             });
           }
         }
-        this.OriginHash = message.data.OriginHash.split("").map((a) =>
-          Number(a)
-        );
+        let MapFunction = (v) => {
+          if (v instanceof Array) {
+            return v.map(MapFunction);
+          }
+          return v.split("").map((a) =>
+            Number(a)
+          );
+        }
+        this.OriginHash = message.data.OriginHash.map(MapFunction);
         this.ModifyingItem = {
           id: this.detectedItem[0].id,
           name: this.ItemNames[this.detectedItem[0].id],
@@ -330,49 +362,110 @@ export class DetectSetttingComponent implements OnInit {
       this.hashCompareCanvas.height
     );
     this.hashCompareCtx.beginPath();
-    for (let [index, value] of this.RecordItemHash[
-      this.ModifyBuffer.id
-    ].hash.entries()) {
-      if (index == 143) break;
-      let x1 = index * (this.hashCompareCanvas.width / 144);
-      let y1 =
-        this.hashCompareCanvas.height -
-        Math.round(
-          (this.OriginHash[index] == 1 ? value : 1 - value) *
-            this.hashCompareCanvas.height
+    this.hashCompareCtx.moveTo(0, this.hashCompareCanvas.height - 1);
+    switch (this.RecordItemHash[this.ModifyBuffer.id].version) {
+      case 1:
+        for (let [index, value] of (<number[]>this.RecordItemHash[
+          this.ModifyBuffer.id
+        ].hash).entries()) {
+          let x1 = index * (this.hashCompareCanvas.width / 144);
+          let y1 =
+            this.hashCompareCanvas.height -
+            Math.round(
+              (this.OriginHash[0][index] == 1 ? value : 1 - value) *
+              this.hashCompareCanvas.height
+            );
+          if (index == 0) this.hashCompareCtx.lineTo(x1, y1);
+          if (index == 143) {
+            this.hashCompareCtx.lineTo(this.hashCompareCanvas.width - 1, y1);
+            break
+          }
+          let x2 = (index + 1) * (this.hashCompareCanvas.width / 144);
+          let y2 =
+            this.hashCompareCanvas.height -
+            Math.round(
+              (this.OriginHash[0][index + 1] == 1
+                ? (<number[]>this.RecordItemHash[this.ModifyBuffer.id].hash)[index + 1]
+                : 1 - (<number[]>this.RecordItemHash[this.ModifyBuffer.id].hash)[index + 1]) *
+              this.hashCompareCanvas.height
+            );
+          this.hashCompareCtx.lineTo(x2, y2);
+        }
+        this.hashCompareCtx.lineTo(
+          this.hashCompareCanvas.width - 1,
+          this.hashCompareCanvas.height - 1
         );
-      if (index == 0) this.hashCompareCtx.moveTo(x1, y1);
-      let x2 = (index + 1) * (this.hashCompareCanvas.width / 144);
-      let y2 =
-        this.hashCompareCanvas.height -
-        Math.round(
-          (this.OriginHash[index + 1] == 1
-            ? this.RecordItemHash[this.ModifyBuffer.id].hash[index + 1]
-            : 1 - this.RecordItemHash[this.ModifyBuffer.id].hash[index + 1]) *
-            this.hashCompareCanvas.height
-        );
-      this.hashCompareCtx.lineTo(x2, y2);
+        this.hashCompareCtx.lineWidth = 2;
+        this.hashCompareCtx.strokeStyle = "#000000";
+        this.hashCompareCtx.stroke();
+        this.hashCompareCtx.lineTo(0, this.hashCompareCanvas.height - 1);
+        this.hashCompareCtx.closePath();
+        this.hashCompareCtx.fillStyle = "#0000007f";
+        this.hashCompareCtx.fill();
+        this.hashCompareImage = this.hashCompareCanvas.toDataURL("image/png");
+        break;
+      case 2:
+        let HeightList: number[][] = [new Array(144).fill(this.hashCompareCanvas.height), [], []];
+        let bgColor = ["#ff0000", "#00ff00", "#0000ff"]
+        for (let [color, hash] of this.OriginHash[1].entries()) {
+          this.hashCompareCtx.beginPath();
+          this.hashCompareCtx.moveTo(0,HeightList[color][0]);
+          for (let [index, value] of ((<number[][]>this.RecordItemHash[
+            this.ModifyBuffer.id
+          ].hash)[color]).entries()) {
+            let x1 = index * (this.hashCompareCanvas.width / 144);
+            let y1 =
+              HeightList[color][index] -
+              Math.round(
+                (hash[index] == 1 ? value : 1 - value) *
+                this.hashCompareCanvas.height / 3
+              );
+            if (color < 2) HeightList[color + 1][index] = y1;
+            if (index == 0) this.hashCompareCtx.lineTo(x1, y1);
+            if (index == 143) {
+              this.hashCompareCtx.lineTo(this.hashCompareCanvas.width - 1, y1);
+              break;
+            }
+            let x2 = (index + 1) * (this.hashCompareCanvas.width / 144);
+            let y2 =
+              HeightList[color][index] -
+              Math.round(
+                (hash[index + 1] == 1
+                  ? ((<number[][]>this.RecordItemHash[
+                    this.ModifyBuffer.id
+                  ].hash)[color])[index + 1]
+                  : 1 - ((<number[][]>this.RecordItemHash[
+                    this.ModifyBuffer.id
+                  ].hash)[color])[index + 1]) *
+                this.hashCompareCanvas.height / 3
+              );
+            this.hashCompareCtx.lineTo(x2, y2);
+          }
+          this.hashCompareCtx.lineTo(
+            this.hashCompareCanvas.width - 1,
+            HeightList[color][143] - 1
+          );
+          this.hashCompareCtx.lineWidth = 2;
+          this.hashCompareCtx.strokeStyle = bgColor[color];
+          this.hashCompareCtx.stroke();
+          for (let backindex = 143; backindex >= 0; backindex--) {
+            this.hashCompareCtx.lineTo(backindex * (this.hashCompareCanvas.width / 144), HeightList[color][backindex] - 1 - (color == 0 ? 0 : 1))
+          }
+        //  this.hashCompareCtx.closePath();
+          this.hashCompareCtx.fillStyle = bgColor[color] + "7f";
+          this.hashCompareCtx.fill()
+        }
+        this.hashCompareImage = this.hashCompareCanvas.toDataURL("image/png");
+        break;
     }
-    this.hashCompareCtx.lineTo(
-      this.hashCompareCanvas.width - 1,
-      this.hashCompareCanvas.height - 1
-    );
-    this.hashCompareCtx.lineTo(0, this.hashCompareCanvas.height - 1);
-    this.hashCompareCtx.closePath();
-    this.hashCompareCtx.lineWidth = 2;
-    this.hashCompareCtx.strokeStyle = "#00ff00";
-    this.hashCompareCtx.stroke();
-    this.hashCompareCtx.fillStyle = "#2cf64f8a";
-    this.hashCompareCtx.fill();
-    this.hashCompareImage = this.hashCompareCanvas.toDataURL("image/png");
     return;
   }
   get ModifyingConfidence() {
     let tempData = this.ModifyingItem.item.find((v) => v.id == this.ModifyBuffer.id);
-    if(!tempData) {
+    if (!tempData) {
       return 0;
     }
-    if(!("confidence" in tempData)){
+    if (!("confidence" in tempData)) {
       tempData.confidence = 0;
 
     }
@@ -389,14 +482,24 @@ export class DetectSetttingComponent implements OnInit {
       HashList =
         this.ItemHashList.push({
           id: this.ModifyBuffer.id,
-          hash: new Array(144).fill(0),
-          count: 0,
+          hash: [new Array(144).fill(0), new Array(144).fill(0), new Array(144).fill(0)],
+          version: 2,
+          count: 0
         }) - 1;
     }
-    let NewHashList = this.mergeHash(
-      this.ItemHashList[HashList],
-      this.OriginHash.join("")
-    );
+
+    let NewHashList
+    if (this.ItemHashList[HashList].version == 1) {
+      NewHashList = this.mergeHash(
+        this.ItemHashList[HashList],
+        this.OriginHash[0].join("")
+      );
+    } else {
+      NewHashList = this.mergeHashV2(
+        this.ItemHashList[HashList],
+        this.OriginHash[1]
+      );
+    }
     NewHashList.id = this.ItemHashList[HashList].id;
     this.ItemHashList[HashList] = NewHashList;
     localStorage.setItem("detect-setting", JSON.stringify(this.ItemHashList));
@@ -416,13 +519,15 @@ export class DetectSetttingComponent implements OnInit {
       HashList = this.ItemHashList[
         this.ItemHashList.push({
           id: this.ModifyBuffer.id,
-          hash: new Array(144).fill(0),
-          count: 0,
+          hash: [new Array(144).fill(0), new Array(144).fill(0), new Array(144).fill(0)],
+          version: 2,
+          count: 0
         }) - 1
       ];
     }
     HashList.count = 1;
-    HashList.hash = this.OriginHash;
+    HashList.hash = this.OriginHash[1];
+    HashList.version = 2;
     localStorage.setItem("detect-setting", JSON.stringify(this.ItemHashList));
     this.EditGuiReset();
     this.worker.postMessage({

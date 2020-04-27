@@ -1,10 +1,5 @@
 <div class="ad-containr" fxLayout="column">
-  <div
-    mdcCard
-    class="card-title"
-    fxLayout="row wrap"
-    fxLayoutAlign="center center"
-  >
+  <div mdcCard class="card-title" fxLayout="row wrap" fxLayoutAlign="center center">
     <button mdcButton raised dense type="button" (click)="dialogImport.open()">
       导入
     </button>
@@ -24,9 +19,11 @@
       style="display: none;"
     /><br />
   </div>
-  <canvas (click)="ChoiceItem($event, dialog)" style="margin: 0 auto;"
-    >浏览器不支持Canvas 建议您换用最新版的Chrome/Firefox浏览器</canvas
-  >
+  <div id="canvas-box">
+    <canvas ngClass.lt-sm="lt-sm" (click)="ChoiceItem($event, dialog)"
+      >浏览器不支持Canvas 建议您换用最新版的Chrome/Firefox浏览器</canvas
+    >
+  </div>
   <aside #dialog="mdcDialog" mdcDialog mdcFocusTrap>
     <div mdcDialogSurface>
       <header mdcDialogHeader>
@@ -45,11 +42,7 @@
                 [disabled]="ModifyBuffer.delete"
                 (change)="GenCompareImage()"
               >
-                <option
-                  *ngFor="let item of ModifyingItem.item; let i = index"
-                  [value]="item.id"
-                  ng-selected="i === 0"
-                >
+                <option *ngFor="let item of ModifyingItem.item; let i = index" [value]="item.id" ng-selected="i === 0">
                   {{ ItemNames[item.id] || item.name }}</option
                 >
               </select>
@@ -57,31 +50,15 @@
             </div>
           </ng-container>
         </div>
-        <div
-          *ngIf="ModifyingItem !== null"
-          class="textdiv"
-          style="text-align: center;"
-        >
-          源物品数据为{{
-            RecordItemHash[ModifyBuffer.id].count
-          }}个数据的平均值<br />
+        <div *ngIf="ModifyingItem !== null" class="textdiv" style="text-align: center;">
+          源物品数据为{{ RecordItemHash[ModifyBuffer.id].count }}个数据的平均值<br />
           判断的物品相似度为{{ ModifyingConfidence * 100 | number: "1.0-3" }}%
         </div>
         <div *ngIf="ModifyingItem !== null">
-          <img
-            [src]="hashCompareImage"
-            style="float: left; width: calc(100% - 90px);"
-          />
-          <div class="textdiv" style="margin-left:5px;width: 85px;float: left;">
+          <img [src]="hashCompareImage" style="float: left; width: calc(100% - 90px);" />
+          <div class="textdiv" style="margin-left: 5px; width: 85px; float: left;">
             相似部分
-            <div
-              style="
-                width: 35px;
-                height: 19px;
-                border: 1px #fff solid;
-                background-color: #2cf64f8a;
-              "
-            ></div>
+            <div style="width: 35px; height: 19px; border: 1px #fff solid; background-color: #2cf64f8a;"></div>
           </div>
         </div>
       </section>

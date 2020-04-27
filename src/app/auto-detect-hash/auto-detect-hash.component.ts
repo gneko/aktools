@@ -275,8 +275,11 @@ export class AutoDetectHashComponent implements OnInit {
       JSON.parse(localStorage.getItem("detect-setting")) ||
       Boolean(localStorage.setItem("detect-setting", JSON.stringify(this.SourceHashList))) ||
       this.SourceHashList;
+    SourceHashList = SourceHashList.map(v => {
+      if (!v.version) v.version = 1;
+      return v
+    })
     if (SourceHashList !== this.SourceHashList) {
-      const sl = SourceHashList.length;
       for (let i = 0; i < this.SourceHashList.length; i++) {
         if (
           !SourceHashList.some(v => {
@@ -286,15 +289,9 @@ export class AutoDetectHashComponent implements OnInit {
           SourceHashList.push(this.SourceHashList[i]);
         }
       }
-      if (sl != SourceHashList.length) {
-        localStorage.setItem("detect-setting", JSON.stringify(this.SourceHashList));
-      }
+      localStorage.setItem("detect-setting", JSON.stringify(SourceHashList));
       this.SourceHashList = SourceHashList;
     }
-    SourceHashList = SourceHashList.map(v => {
-      if (!v.version) v.version = 1;
-      return v
-    })
     this.worker.postMessage({
       method: "LoadHashData",
       Data: this.SourceHashList

@@ -4,10 +4,15 @@ interface SourceHashList {
   name?: string;
   version?: number;
   hash: number[] | /* version 1 */ number[][] /* version 2 */;
-  count: number;
+  count?: number;
 }
 let SourceHashList: SourceHashList[] = [];
-let NumbersHashList:any = [{
+let NumbersHashList: {
+  number: number;
+  hash: number[];
+  count: number;
+  confidence?: number;
+}[] = [{
   "number": 0,
   "hash": [2, 9, 8, 3, 0, 0, 0, 0, 10, 2, 0, 0, 10, 10, 1, 0, 10, 0, 0, 0, 0, 10, 8, 0, 3, 0, 0, 0, 0, 6, 10, 2, 0, 0, 0, 0, 0, 4, 10, 3, 0, 0, 0, 0, 0, 4, 10, 3, 3, 0, 0, 0, 0, 5, 10, 2, 9, 0, 0, 0, 0, 9, 9, 0, 10, 3, 0, 0, 10, 10, 1, 0, 3, 9, 10, 3, 0, 0, 0, 0],
   "count": 10
@@ -78,8 +83,8 @@ let BoundDatas = [
 ];
 let XPoint: Uint16Array; //Y轴方向上的匹配点计数
 let YPoint: Uint16Array; //X轴方向上的匹配点计数
-let XBound = [[]];
-let YBound = [[]];
+let XBound: number[][] = [[]];
+let YBound: number[][] = [[]];
 let HashList = [];
 let NumberHashList = [];
 let OriginHashList = [];
@@ -145,20 +150,20 @@ function analyzeBound() {
   for (let x = 0; x < XBound.length; x++) {
     MaxWidthinLine.push(XBound[x][1] - XBound[x][0]);
   }
-  let mw:number;
+  let mw: number;
   // 补丁2 技巧概要边界
   for (let x = 0; x < XBound.length; x++) {
-    if(x==0) continue;
-    if (XBound[x-1][1]-XBound[x-1][0] < 50 && XBound[x][1]-XBound[x][0] < 50) {
+    if (x == 0) continue;
+    if (XBound[x - 1][1] - XBound[x - 1][0] < 50 && XBound[x][1] - XBound[x][0] < 50) {
       MaxWidthinLine = []
       for (let xa = 0; xa < XBound.length; xa++) {
-        if(xa==x-1||xa==x) continue;
+        if (xa == x - 1 || xa == x) continue;
         MaxWidthinLine.push(XBound[xa][1] - XBound[xa][0]);
       }
-      mw=Math.round(MaxWidthinLine.reduce((a, b) => a + b) / MaxWidthinLine.length);
-      if (Math.abs(XBound[x][1] - XBound[x-1][0] - mw) < 20) {
-        XBound.splice(x-1,2,[XBound[x-1][0],XBound[x][1]]);
-        x=x-1;
+      mw = Math.round(MaxWidthinLine.reduce((a, b) => a + b) / MaxWidthinLine.length);
+      if (Math.abs(XBound[x][1] - XBound[x - 1][0] - mw) < 20) {
+        XBound.splice(x - 1, 2, [XBound[x - 1][0], XBound[x][1]]);
+        x = x - 1;
       }
     }
   }
@@ -206,6 +211,87 @@ function analyzeBound() {
     }
   }
 }
+function dHashCompare(inputImageDatas: any[]) {
+  let TempHashList = [];
+  if (HashList.length == 0) {
+    TempHashList = inputImageDatas.map((item: ImageData) => {
+      let HashString: [string /* 灰度 */, [string /* R */, string /* G */, string /* B */]] = ["", ["", "", ""]];
+      for (let index = 0; index < item.data.length; index += 4) {
+        if (Math.floor(index / 4) % item.width == 0) continue;
+        if (
+          Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) >
+          Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)
+        ) {
+          HashString[0] += 1;
+        } else {
+          HashString[0] += 0;
+        }
+        HashString[1][0] += (item.data[index - 4] > item.data[index]) ? 1 : 0;
+        HashString[1][1] += (item.data[index - 3] > item.data[index + 1]) ? 1 : 0;
+        HashString[1][2] += (item.data[index - 2] > item.data[index + 2]) ? 1 : 0;
+      }
+      return HashString;
+    });
+  } else {
+    TempHashList=inputImageDatas;
+  }
+  if (OriginHashList.length == 0) OriginHashList = [...TempHashList];
+  if (HashList.length == 0) {
+    postMessage({ method: "status", text: "正在判断图像对应的物品", progress: 0.45 });
+  }
+  TempHashList = TempHashList.map((hash: [string /* 灰度 */, [string /* R */, string /* G */, string /* B */]]) => {
+    const ConfidenceFilter = SourceHashList.map(hashs => {
+      let Confidence = 0;
+      let HashLength = 144;
+      
+      for (let i = 0; i < HashLength; i++) {
+        switch (hashs.version) {
+          case 1:
+            if (hash[0][i] == "1") {
+              Confidence += <number>hashs.hash[i];
+            } else {
+              Confidence += (1 - <number>hashs.hash[i]);
+            }
+            break
+          case 2:
+            for (let [colorid,color] of hash[1].entries()) {
+              if (color[i] == "1") {
+                Confidence += (<number[][]>hashs.hash)[colorid][i]
+              } else {
+                Confidence += 1 - (<number[][]>hashs.hash)[colorid][i];
+              }
+            }
+            break;
+        }
+      }
+      if (hashs.version == 2) HashLength *= 3;
+      Confidence /= HashLength;
+      let TempDataBuffer: any = {
+        id: hashs.id,
+        hash: hashs.hash,
+        confidence: Confidence,
+        count: hashs.count,
+        version:hashs.version
+      }; // 深拷贝
+      if (hashs.name) {
+        TempDataBuffer.name = hashs.name;
+      }
+      return TempDataBuffer;
+    }).sort((a, b) => {
+      return b.confidence - a.confidence;
+    });
+    if (ConfidenceFilter[0].confidence <= 0.75) {
+      ConfidenceFilter.unshift({
+        id: "0000",
+        hash: "",
+        count: 0,
+        confidence: 1
+      });
+    }
+    return ConfidenceFilter;
+  });
+  return TempHashList;
+}
 addEventListener("message", message => {
   switch (message.data.method) {
     case "LoadHashData":
@@ -230,92 +316,9 @@ addEventListener("message", message => {
     case "calcDhash":
       if (typeof message.data.index != "undefined" && OriginHashList.length !== 0) {
         let hash = OriginHashList[message.data.index];
-        const ConfidenceFilter = SourceHashList.map(hashs => {
-          let Confidence = 0;
-          let AllLength = 144;
-          for (let i = 0; i < hash.length; i++) {
-            if (hash[i] == "1") {
-              Confidence += <number>hashs.hash[i];
-            } else {
-              Confidence += 1 - <number>hashs.hash[i];
-            }
-          }
-          Confidence /= AllLength;
-          let TempDataBuffer: any = {
-            id: hashs.id,
-            hash: hashs.hash,
-            confidence: Confidence,
-            count: hashs.count
-          }; // 深拷贝
-          if (hashs.name) {
-            TempDataBuffer.name = hashs.name;
-          }
-          return TempDataBuffer;
-        }).sort((a, b) => {
-          return b.confidence - a.confidence;
-        });
-        if (ConfidenceFilter[0].confidence <= 0.75) {
-          ConfidenceFilter.unshift({
-            id: "0000",
-            hash: "",
-            count: 0,
-            confidence: 1
-          });
-        }
-        HashList[message.data.index] = ConfidenceFilter;
+        HashList[message.data.index] = dHashCompare([hash])[0];
       } else {
-        HashList = message.data.ImageDatas.map((item: ImageData) => {
-          let HashString = "";
-          for (let index = 0; index < item.data.length; index += 4) {
-            if (Math.floor(index / 4) % item.width == 0) continue;
-            if (
-              Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) >
-              Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)
-            ) {
-              HashString += 1;
-            } else {
-              HashString += 0;
-            }
-          }
-          return HashString;
-        });
-        OriginHashList = [...HashList];
-        postMessage({ method: "status", text: "正在判断图像对应的物品", progress: 0.45 });
-        HashList = HashList.map((hash: String) => {
-          const ConfidenceFilter = SourceHashList.map(hashs => {
-            let Confidence = 0;
-            let AllLength = 144;
-            for (let i = 0; i < hash.length; i++) {
-              if (hash[i] == "1") {
-                Confidence += <number>hashs.hash[i];
-              } else {
-                Confidence += 1 - <number>hashs.hash[i];
-              }
-            }
-            Confidence /= AllLength;
-            let TempDataBuffer: any = {
-              id: hashs.id,
-              hash: hashs.hash,
-              confidence: Confidence,
-              count: hashs.count
-            }; // 深拷贝
-            if (hashs.name) {
-              TempDataBuffer.name = hashs.name;
-            }
-            return TempDataBuffer;
-          }).sort((a, b) => {
-            return b.confidence - a.confidence;
-          });
-          if (ConfidenceFilter[0].confidence <= 0.75) {
-            ConfidenceFilter.unshift({
-              id: "0000",
-              hash: "",
-              count: 0,
-              confidence: 1
-            });
-          }
-          return ConfidenceFilter;
-        });
+        HashList = dHashCompare(message.data.ImageDatas);
         postMessage({ method: "status", text: "主线程切割数字(页面可能暂时卡死)", progress: 0.57 });
         postMessage({ method: "getNumberData" });
       }

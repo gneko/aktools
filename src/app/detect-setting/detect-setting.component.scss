@@ -40,6 +40,22 @@ select {
   }
 }
 
+canvas {
+  max-width: 1200px;
+  margin: auto;
+}
+canvas:not(.lt-sm){
+  width: 100%;
+}
+canvas.lt-sm {
+  max-height: 500px;
+}
+#canvas-box {
+  max-width: 100%;
+  overflow-x: auto;
+  text-align: center;
+}
+
 [mdcButton]:not(.mdc-button--raised) {
   color: var(--mdc-theme-on-surface);
   &:hover, &:checked {
@@ -61,10 +77,6 @@ select {
 [mdcLinearProgress] {
   max-width:1200px;
   margin:0 auto 10px auto;
-}
-canvas {
-  width:100%;
-  max-width:  1200px;
 }
 .textdiv {
   color: $color-muted;
