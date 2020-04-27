@@ -183,9 +183,9 @@ export class DetectSetttingComponent implements OnInit {
       };
     }
   }
-  mergeHashV2(target:SourceHashList,data:SourceHashList) {
-    target.hash=(<number[][]>target.hash).map((color,colorindex)=>{
-      return color.map((hashvalue,hashindex)=>{
+  mergeHashV2(target: SourceHashList, data: SourceHashList) {
+    target.hash = (<number[][]>target.hash).map((color, colorindex) => {
+      return color.map((hashvalue, hashindex) => {
         return hashvalue + data.hash[colorindex][hashindex];
       })
     })
@@ -284,6 +284,19 @@ export class DetectSetttingComponent implements OnInit {
               Canvas.width,
               Canvas.height
             );
+            let excludePixel = ctx.getImageData(0, 0, Canvas.width, Canvas.height);
+            let excludeR = Math.floor((Canvas.width + Canvas.height) / 2);
+            let excludeO = [Math.ceil(Canvas.width / 2), Math.floor(Canvas.height / 2)]
+            for (let sy = 0; sy < Canvas.height; sy++) {
+              for (let sx = 0; sx < Canvas.width; sx++) {
+                if (Math.hypot(sx - excludeO[0], sy - excludeO[1]) > excludeR) {
+                  excludePixel.data[sy + Canvas.width + sx] = 255;
+                  excludePixel.data[sy + Canvas.width + sx + 1] = 255;
+                  excludePixel.data[sy + Canvas.width + sx + 2] = 255;
+                }
+              }
+            }
+            ctx.putImageData(excludePixel, 0, 0);
             this.ItemImages.push(Canvas);
             const DhashCanvas = document.createElement("canvas");
             DhashCanvas.width = 13;
@@ -409,7 +422,7 @@ export class DetectSetttingComponent implements OnInit {
         let bgColor = ["#ff0000", "#00ff00", "#0000ff"]
         for (let [color, hash] of this.OriginHash[1].entries()) {
           this.hashCompareCtx.beginPath();
-          this.hashCompareCtx.moveTo(0,HeightList[color][0]);
+          this.hashCompareCtx.moveTo(0, HeightList[color][0]);
           for (let [index, value] of ((<number[][]>this.RecordItemHash[
             this.ModifyBuffer.id
           ].hash)[color]).entries()) {
@@ -451,7 +464,7 @@ export class DetectSetttingComponent implements OnInit {
           for (let backindex = 143; backindex >= 0; backindex--) {
             this.hashCompareCtx.lineTo(backindex * (this.hashCompareCanvas.width / 144), HeightList[color][backindex] - 1 - (color == 0 ? 0 : 1))
           }
-        //  this.hashCompareCtx.closePath();
+          //  this.hashCompareCtx.closePath();
           this.hashCompareCtx.fillStyle = bgColor[color] + "7f";
           this.hashCompareCtx.fill()
         }

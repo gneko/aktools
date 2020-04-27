@@ -332,6 +332,19 @@ export class AutoDetectHashComponent implements OnInit {
               Canvas.width,
               Canvas.height
             );
+            let excludePixel = ctx.getImageData(0, 0, Canvas.width, Canvas.height);
+            let excludeR = Math.floor((Canvas.width + Canvas.height) / 2);
+            let excludeO = [Math.ceil(Canvas.width / 2), Math.floor(Canvas.height / 2)]
+            for (let sy = 0; sy < Canvas.height; sy++) {
+              for (let sx = 0; sx < Canvas.width; sx++) {
+                if (Math.hypot(sx - excludeO[0], sy - excludeO[1]) > excludeR) {
+                  excludePixel.data[sy + Canvas.width + sx] = 255;
+                  excludePixel.data[sy + Canvas.width + sx + 1] = 255;
+                  excludePixel.data[sy + Canvas.width + sx + 2] = 255;
+                }
+              }
+            }
+            ctx.putImageData(excludePixel, 0, 0);
             this.ItemImages.push(Canvas);
             const DhashCanvas = document.createElement("canvas");
             DhashCanvas.width = 13;
