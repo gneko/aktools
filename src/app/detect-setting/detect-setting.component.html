@@ -20,7 +20,7 @@
     /><br />
   </div>
   <div id="canvas-box">
-    <canvas ngClass.lt-sm="lt-sm" (click)="ChoiceItem($event, dialog)"
+    <canvas id="MainCanvas" ngClass.lt-sm="lt-sm" (click)="ChoiceItem($event, dialog)"
       >浏览器不支持Canvas 建议您换用最新版的Chrome/Firefox浏览器</canvas
     >
   </div>
@@ -55,11 +55,7 @@
           判断的物品相似度为{{ ModifyingConfidence * 100 | number: "1.0-3" }}%
         </div>
         <div *ngIf="ModifyingItem !== null">
-          <img [src]="hashCompareImage" style="float: left; width: calc(100% - 90px);" />
-          <div class="textdiv" style="margin-left: 5px; width: 85px; float: left;">
-            相似部分
-            <div style="width: 35px; height: 19px; border: 1px #fff solid; background-color: #2cf64f8a;"></div>
-          </div>
+          <canvas id="HashDiff" style="min-height:200px;max-height: 300px;"></canvas>
         </div>
       </section>
       <footer mdcDialogFooter>

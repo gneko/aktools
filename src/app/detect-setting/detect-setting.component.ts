@@ -1,7 +1,10 @@
-import { Component, OnInit, ElementRef } from "@angular/core";
+import { Component, OnInit, ElementRef, ViewChild } from "@angular/core";
 import { MdcSnackbarService, MdcDialogDirective } from "@blox/material";
 import { FetchService } from "../fetch.service";
 import { Router } from "@angular/router";
+import * as echarts from 'echarts/lib/echarts';
+import "echarts/lib/chart/line"
+import "echarts/lib/component/title";
 interface SourceHashList {
   id?: string;
   name?: string;
@@ -50,14 +53,13 @@ export class DetectSetttingComponent implements OnInit {
   } = {};
   OriginHash: any = [];
   ImageDatas: any[];
-  hashCompareCanvas = document.createElement("canvas");
-  hashCompareCtx: CanvasRenderingContext2D;
-  hashCompareImage: String;
+  hashCompareCanvas: HTMLCanvasElement;
+  hashCompareChart: echarts.ECharts;
   constructor(
     private fetchService: FetchService,
     private snackbar: MdcSnackbarService,
     private router: Router,
-    private el: ElementRef
+    private el: ElementRef,
   ) { }
 
   async ngOnInit() {
@@ -71,11 +73,11 @@ export class DetectSetttingComponent implements OnInit {
       this.registerWorker();
     });
     this.ImageElement = document.createElement("img");
-    this.Canvas = this.el.nativeElement.getElementsByTagName("canvas")[0];
+    this.Canvas = this.el.nativeElement.querySelector("#MainCanvas");
+    this.hashCompareCanvas = document.createElement("canvas");
     this.Ctx = this.Canvas.getContext("2d");
     this.hashCompareCanvas.width = 1152;
     this.hashCompareCanvas.height = 220;
-    this.hashCompareCtx = this.hashCompareCanvas.getContext("2d");
     this.MaxFontSize = this.fetchService.getLocalStorage("detect-mfs", true);
     this.textColor = this.fetchService.getLocalStorage(
       "detect-tclr",
@@ -363,112 +365,135 @@ export class DetectSetttingComponent implements OnInit {
             this.ModifyBuffer[key] = this.ModifyingItem[key];
           }
         }
-        this.GenCompareImage();
+        setTimeout(this.GenCompareImage.bind(this), 800);
         break;
     }
   }
   GenCompareImage() {
-    this.hashCompareCtx.clearRect(
-      0,
-      0,
-      this.hashCompareCanvas.width,
-      this.hashCompareCanvas.height
-    );
-    this.hashCompareCtx.beginPath();
-    this.hashCompareCtx.moveTo(0, this.hashCompareCanvas.height - 1);
+    let option: echarts.EChartOption
     switch (this.RecordItemHash[this.ModifyBuffer.id].version) {
       case 1:
-        for (let [index, value] of (<number[]>this.RecordItemHash[
-          this.ModifyBuffer.id
-        ].hash).entries()) {
-          let x1 = index * (this.hashCompareCanvas.width / 144);
-          let y1 =
-            this.hashCompareCanvas.height -
-            Math.round(
-              (this.OriginHash[0][index] == 1 ? value : 1 - value) *
-              this.hashCompareCanvas.height
-            );
-          if (index == 0) this.hashCompareCtx.lineTo(x1, y1);
-          if (index == 143) {
-            this.hashCompareCtx.lineTo(this.hashCompareCanvas.width - 1, y1);
-            break
-          }
-          let x2 = (index + 1) * (this.hashCompareCanvas.width / 144);
-          let y2 =
-            this.hashCompareCanvas.height -
-            Math.round(
-              (this.OriginHash[0][index + 1] == 1
-                ? (<number[]>this.RecordItemHash[this.ModifyBuffer.id].hash)[index + 1]
-                : 1 - (<number[]>this.RecordItemHash[this.ModifyBuffer.id].hash)[index + 1]) *
-              this.hashCompareCanvas.height
-            );
-          this.hashCompareCtx.lineTo(x2, y2);
+        option = {
+          legend: {
+            data: ["Grey"]
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: [
+            {
+              type: <any>'category',
+              boundaryGap: false,
+              data: Object.keys(new Array(144).fill(0)),
+            }
+          ],
+          yAxis: [
+            {
+              type: <any>'value',
+              name: "相似度/%"
+            }
+          ],
+          series: [
+            {
+              name: 'Grey',
+              type: 'line',
+              showSymbol: false,
+              areaStyle: {},
+              data: (<number[]>this.RecordItemHash[this.ModifyBuffer.id].hash).map((v, i) => {
+                if (this.OriginHash[0][i]) {
+                  return v * 100;
+                } else {
+                  return (1 - v) * 100;
+                }
+              })
+            }
+          ],
+          color: ["#000000"]
         }
-        this.hashCompareCtx.lineTo(
-          this.hashCompareCanvas.width - 1,
-          this.hashCompareCanvas.height - 1
-        );
-        this.hashCompareCtx.lineWidth = 2;
-        this.hashCompareCtx.strokeStyle = "#000000";
-        this.hashCompareCtx.stroke();
-        this.hashCompareCtx.lineTo(0, this.hashCompareCanvas.height - 1);
-        this.hashCompareCtx.closePath();
-        this.hashCompareCtx.fillStyle = "#0000007f";
-        this.hashCompareCtx.fill();
-        this.hashCompareImage = this.hashCompareCanvas.toDataURL("image/png");
+        this.hashCompareCanvas = this.el.nativeElement.querySelector("#HashDiff");
+        this.hashCompareCanvas.width = this.hashCompareCanvas.clientWidth;
+        this.hashCompareCanvas.height = this.hashCompareCanvas.clientHeight;
+        this.hashCompareChart = echarts.init(this.hashCompareCanvas);
+        this.hashCompareChart.setOption(option,true);
         break;
       case 2:
-        let HeightList: number[][] = [new Array(144).fill(this.hashCompareCanvas.height), [], []];
-        let bgColor = ["#ff0000", "#00ff00", "#0000ff"]
-        for (let [color, hash] of this.OriginHash[1].entries()) {
-          this.hashCompareCtx.beginPath();
-          this.hashCompareCtx.moveTo(0, HeightList[color][0]);
-          for (let [index, value] of ((<number[][]>this.RecordItemHash[
-            this.ModifyBuffer.id
-          ].hash)[color]).entries()) {
-            let x1 = index * (this.hashCompareCanvas.width / 144);
-            let y1 =
-              HeightList[color][index] -
-              Math.round(
-                (hash[index] == 1 ? value : 1 - value) *
-                this.hashCompareCanvas.height / 3
-              );
-            if (color < 2) HeightList[color + 1][index] = y1;
-            if (index == 0) this.hashCompareCtx.lineTo(x1, y1);
-            if (index == 143) {
-              this.hashCompareCtx.lineTo(this.hashCompareCanvas.width - 1, y1);
-              break;
+        option = {
+          legend: {
+            data: ["R", "G", "B"]
+          },
+          xAxis: [
+            {
+              type: <any>'category',
+              boundaryGap: false,
+              data: Object.keys(new Array(144).fill(0)),
             }
-            let x2 = (index + 1) * (this.hashCompareCanvas.width / 144);
-            let y2 =
-              HeightList[color][index] -
-              Math.round(
-                (hash[index + 1] == 1
-                  ? ((<number[][]>this.RecordItemHash[
-                    this.ModifyBuffer.id
-                  ].hash)[color])[index + 1]
-                  : 1 - ((<number[][]>this.RecordItemHash[
-                    this.ModifyBuffer.id
-                  ].hash)[color])[index + 1]) *
-                this.hashCompareCanvas.height / 3
-              );
-            this.hashCompareCtx.lineTo(x2, y2);
-          }
-          this.hashCompareCtx.lineTo(
-            this.hashCompareCanvas.width - 1,
-            HeightList[color][143] - 1
-          );
-          this.hashCompareCtx.lineWidth = 2;
-          this.hashCompareCtx.strokeStyle = bgColor[color];
-          this.hashCompareCtx.stroke();
-          for (let backindex = 143; backindex >= 0; backindex--) {
-            this.hashCompareCtx.lineTo(backindex * (this.hashCompareCanvas.width / 144), HeightList[color][backindex] - 1 - (color == 0 ? 0 : 1))
-          }
-          //  this.hashCompareCtx.closePath();
-          this.hashCompareCtx.fillStyle = bgColor[color] + "7f";
-          this.hashCompareCtx.fill()
+          ],
+          yAxis: [
+            {
+              type: <any>'value',
+              name: "相似度/%"
+            }
+          ],
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          series: [
+            {
+              name: 'R',
+              type: 'line',
+              stack: "Color",
+              showSymbol: false,
+              areaStyle: {},
+              data: (<number[][]>this.RecordItemHash[this.ModifyBuffer.id].hash)[0].map((v, i) => {
+                if (this.OriginHash[1][0][i]) {
+                  return v * 100 / 3;
+                } else {
+                  return (1 - v) * 100 / 3;
+                }
+              })
+            },
+            {
+              name: 'G',
+              type: 'line',
+              stack: "Color",
+              showSymbol: false,
+              areaStyle: {},
+              data: (<number[][]>this.RecordItemHash[this.ModifyBuffer.id].hash)[1].map((v, i) => {
+                if (this.OriginHash[1][1][i]) {
+                  return v * 100 / 3;
+                } else {
+                  return (1 - v) * 100 / 3;
+                }
+              })
+            },
+            {
+              name: 'B',
+              type: 'line',
+              stack: "Color",
+              areaStyle: {},
+              showSymbol: false,
+              data: (<number[][]>this.RecordItemHash[this.ModifyBuffer.id].hash)[2].map((v, i) => {
+                if (this.OriginHash[1][2][i]) {
+                  return v * 100 / 3;
+                } else {
+                  return (1 - v) * 100 / 3;
+                }
+              })
+            }
+          ],
+          color: ["#ff0000", "#00ff00", "#0000ff"]
         }
-        this.hashCompareImage = this.hashCompareCanvas.toDataURL("image/png");
+        this.hashCompareCanvas = this.el.nativeElement.querySelector("#HashDiff");
+        this.hashCompareCanvas.width = this.hashCompareCanvas.clientWidth;
+        this.hashCompareCanvas.height = this.hashCompareCanvas.clientHeight;
+        this.hashCompareChart = echarts.init(this.hashCompareCanvas);
+        this.hashCompareChart.setOption(option,true);
         break;
     }
     return;

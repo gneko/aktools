@@ -218,13 +218,17 @@ function dHashCompare(inputImageDatas: any[]) {
       let HashString: [string /* 灰度 */, [string /* R */, string /* G */, string /* B */]] = ["", ["", "", ""]];
       for (let index = 0; index < item.data.length; index += 4) {
         if (Math.floor(index / 4) % item.width == 0) continue;
-        if (
-          Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) >
-          Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)
-        ) {
-          HashString[0] += 1;
+        if(Math.hypot(Math.floor(index / 4) % item.width,Math.floor(Math.floor(index / 4) / item.width) / item.width) < 6) {
+          if (
+            Math.floor((item.data[index - 4] + item.data[index - 3] + item.data[index - 2]) / 3) >
+            Math.floor((item.data[index] + item.data[index + 1] + item.data[index + 2]) / 3)
+          ) {
+            HashString[0] += 1;
+          } else {
+            HashString[0] += 0;
+          }
         } else {
-          HashString[0] += 0;
+          HashString[0] += 2;
         }
         HashString[1][0] += (item.data[index - 4] > item.data[index]) ? 1 : 0;
         HashString[1][1] += (item.data[index - 3] > item.data[index + 1]) ? 1 : 0;
@@ -247,6 +251,10 @@ function dHashCompare(inputImageDatas: any[]) {
       for (let i = 0; i < HashLength; i++) {
         switch (hashs.version) {
           case 1:
+            if (hash[0][i] == "2") {
+              Confidence += 1;
+              break;
+            }
             if (hash[0][i] == "1") {
               Confidence += <number>hashs.hash[i];
             } else {
