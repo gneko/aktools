@@ -2,7 +2,7 @@ name: Auto update data
 
 on: 
   schedule:
-    - cron: '0 4-10 * * *'
+    - cron: '0 3-10 * * *'
 
 jobs:
   auto-update:
