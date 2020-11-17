@@ -13,7 +13,7 @@ jobs:
         run: |
           curl -sL https://github.com/Kengxxiao/ArknightsGameData/commits/master.atom | grep -m1 "CN UPDATE" > version/data
           if [ -n "$(git status --porcelain)" ]; then
-            echo "::set-env name=UPDATE::1"
+            echo "UPDATE=1" >> $GITHUB_ENV
           fi
       - uses: actions/setup-python@v1
         if: env.UPDATE==1
@@ -28,9 +28,9 @@ jobs:
           NEWST=$(python ./tools/extractStages.py)
           [[ $NEWCH ]] || [[ $NEWST ]] && COMB=$NEWCH$NEWST
           [[ $NEWCH ]] && [[ $NEWST ]] && COMB=$NEWCH"\ &\ "$NEWST
-          echo "::set-env name=UPDATE::0"
+          echo "UPDATE=0" >> $GITHUB_ENV
           if [[ $COMB ]]; then
-            echo "::set-env name=UPDATE::1"
+            echo "UPDATE=1" >> $GITHUB_ENV
             [[ $NEWCH ]] && sed -i -e '/id="updates".*/a \ \ \ \ \ \ \ \ <p>'$(date +"%Y.%m.%d")' '$NEWCH'</p>' src/app/main/main.component.html
             git config --global user.name "Neko Bot"
             git config --global user.email "graueneko@gmail.com"
